@@ -1,0 +1,1145 @@
+<title>Afterglow Mission Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+/* Layout: sticky contents rail + one reading column; wide tables scroll inside their own box. */
+:root{
+  --bg:#F2F4F6; --surface:#FFFFFF; --ink:#15212C; --muted:#56636F; --line:#D3DAE1; --line-soft:#E6EBEF;
+  --accent:#B83F0B; --accent-soft:#FBE6DA;
+  --modis:#6A4DB0; --modis-soft:#ECE6F8; --viirs:#0E7472; --viirs-soft:#DDF1EF;
+  --warn:#8F5200; --warn-soft:#FBEED9; --crit:#A8231A; --crit-soft:#F9E1DE; --ok:#2C6E35; --ok-soft:#E1F0E2;
+  --hatch:#8E9AA6; --code-bg:#EEF1F4;
+  --f-display:"Archivo","Arial Narrow",Arial,sans-serif;
+  --f-body:"IBM Plex Sans","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E141A; --surface:#141D25; --ink:#E4EBF1; --muted:#9AA8B5; --line:#2B3744; --line-soft:#212C37;
+    --accent:#F37B3F; --accent-soft:#3A2015;
+    --modis:#B19BF2; --modis-soft:#2A2340; --viirs:#4CC7C1; --viirs-soft:#13302F;
+    --warn:#F0B35A; --warn-soft:#352812; --crit:#F2877C; --crit-soft:#3A1B18; --ok:#84CF8D; --ok-soft:#18301B;
+    --hatch:#6E7C8A; --code-bg:#1A242E; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E141A; --surface:#141D25; --ink:#E4EBF1; --muted:#9AA8B5; --line:#2B3744; --line-soft:#212C37;
+  --accent:#F37B3F; --accent-soft:#3A2015;
+  --modis:#B19BF2; --modis-soft:#2A2340; --viirs:#4CC7C1; --viirs-soft:#13302F;
+  --warn:#F0B35A; --warn-soft:#352812; --crit:#F2877C; --crit-soft:#3A1B18; --ok:#84CF8D; --ok-soft:#18301B;
+  --hatch:#6E7C8A; --code-bg:#1A242E; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15.5px;line-height:1.6;margin:0}
+.page{max-width:1240px;margin:0 auto;padding-inline:20px;padding-block:28px 80px;display:grid;grid-template-columns:230px minmax(0,1fr);gap:40px}
+@media (max-width:960px){.page{grid-template-columns:minmax(0,1fr);gap:20px;padding-inline:16px}}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);align-self:start;max-height:calc(100vh - 32px);overflow:auto;font-size:13px;border-right:1px solid var(--line);padding-right:16px}
+@media (max-width:960px){nav.toc{position:static;max-height:none;border-right:0;border-bottom:1px solid var(--line);padding:0 0 12px}}
+nav.toc .eyebrow{margin-bottom:8px}
+nav.toc ol{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+@media (max-width:960px){nav.toc ol{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}}
+nav.toc a{color:var(--muted);text-decoration:none;display:block;padding:3px 6px;border-radius:4px}
+nav.toc a:hover,nav.toc a:focus-visible{color:var(--ink);background:var(--line-soft)}
+nav.toc .num{font-family:var(--f-mono);font-size:11px;color:var(--accent);margin-right:6px}
+main{min-width:0}
+h1,h2,h3,h4{font-family:var(--f-display);font-stretch:85%;line-height:1.15;text-wrap:balance;margin:0}
+h1{font-size:clamp(2rem,4vw,2.9rem);font-weight:800;letter-spacing:-0.01em}
+h2{font-size:1.65rem;font-weight:750;margin-top:56px;padding-top:14px;border-top:2px solid var(--ink)}
+h3{font-size:1.18rem;font-weight:700;margin-top:30px}
+h4{font-size:1rem;font-weight:700;margin-top:20px}
+p,ul,ol{margin:10px 0}
+.prose{max-width:74ch}
+ul,ol{padding-left:22px}
+li{margin:4px 0}
+a{color:var(--accent);text-underline-offset:2px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+code,.mono{font-family:var(--f-mono);font-size:.88em}
+code{background:var(--code-bg);padding:1px 5px;border-radius:3px}
+.eyebrow{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.sec-num{font-family:var(--f-mono);font-size:13px;color:var(--accent);display:block;margin-bottom:6px;letter-spacing:.06em}
+.lede{font-size:1.08rem;color:var(--ink);max-width:70ch}
+.meta-row{display:flex;flex-wrap:wrap;gap:8px 18px;margin:14px 0 4px;font-size:13px;color:var(--muted)}
+.meta-row b{color:var(--ink);font-weight:600}
+.verdict{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:22px}
+.vcard{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px 18px;min-width:0}
+.vcard h3{margin:4px 0 8px;font-size:1.05rem}
+.vcard.selected{border-color:var(--accent);box-shadow:inset 4px 0 0 var(--accent)}
+.vcard p{margin:6px 0;font-size:14.5px}
+.tag{display:inline-block;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;padding:1px 6px;border-radius:3px;vertical-align:1px;margin-right:4px;white-space:nowrap;border:1px solid transparent}
+.tag.fact{background:var(--line-soft);color:var(--ink);border-color:var(--line)}
+.tag.claim{background:var(--viirs-soft);color:var(--viirs)}
+.tag.hyp{background:var(--warn-soft);color:var(--warn)}
+.tag.assume{background:transparent;color:var(--muted);border-color:var(--line)}
+.tag.rec{background:var(--accent-soft);color:var(--accent)}
+.tag.pre{background:var(--modis-soft);color:var(--modis)}
+.tag.ok{background:var(--ok-soft);color:var(--ok)}
+.tag.gray{background:var(--warn-soft);color:var(--warn)}
+.tag.no{background:var(--crit-soft);color:var(--crit)}
+.tag.target{background:var(--modis-soft);color:var(--modis)}
+.tbl{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:13.5px;line-height:1.45}
+th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line-soft)}
+th{font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500;background:var(--bg);position:sticky;top:0}
+tr:last-child td{border-bottom:0}
+td.nowrap{white-space:nowrap}
+.tbl.wide table{min-width:860px}
+.tbl.xwide table{min-width:1040px}
+.finding{border-left:3px solid var(--line);padding:2px 0 2px 14px;margin:16px 0;max-width:78ch}
+.finding .chain{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 10px;font-size:14.5px}
+.finding .chain span.k{font-family:var(--f-mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding-top:3px}
+.finding h4{margin:0 0 6px}
+.callout{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:6px;padding:14px 16px;margin:16px 0;max-width:80ch}
+.callout.warn{border-left-color:var(--warn)}
+.callout.science{border-left-color:var(--viirs)}
+.callout p:first-child{margin-top:0}.callout p:last-child{margin-bottom:0}
+pre.wire{font-family:var(--f-mono);font-size:12px;line-height:1.35;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px;overflow-x:auto;color:var(--ink);margin:12px 0}
+pre.wire .a{color:var(--accent)}
+pre.wire .m{color:var(--muted)}
+pre.mermaid{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px;overflow-x:auto}
+.eq{font-family:var(--f-mono);font-size:13px;background:var(--code-bg);border-radius:6px;padding:12px 14px;overflow-x:auto;white-space:pre;margin:12px 0;line-height:1.55}
+figure{margin:18px 0}
+figcaption{font-size:12.5px;color:var(--muted);margin-top:6px;max-width:80ch}
+.fleet{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px;overflow-x:auto}
+.fleet svg{display:block;min-width:760px;width:100%;height:auto}
+.fleet text{font-family:var(--f-mono);font-size:10.5px;fill:var(--muted)}
+.fleet text.lab{fill:var(--ink);font-size:11px}
+.fleet text.ttl{fill:var(--ink);font-family:var(--f-display);font-size:12.5px;font-weight:700}
+.fleet .axis{stroke:var(--line);stroke-width:1}
+.fleet .grid{stroke:var(--line-soft);stroke-width:1}
+.fleet .bm{fill:var(--modis)} .fleet .bv{fill:var(--viirs)}
+.fleet .pm{fill:none;stroke:var(--modis);stroke-width:1.5;stroke-dasharray:3 2}
+.fleet .pv{fill:none;stroke:var(--viirs);stroke-width:1.5;stroke-dasharray:3 2}
+.fleet .today{stroke:var(--accent);stroke-width:1.5}
+.fleet .hack{stroke:var(--ink);stroke-width:1;stroke-dasharray:2 2}
+.fleet .end{fill:var(--crit)}
+.fleet .acc{fill:var(--accent)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px 14px;min-width:0}
+.box h4{margin-top:0}
+.small{font-size:13px;color:var(--muted)}
+.kbd{font-family:var(--f-mono);font-size:11.5px;border:1px solid var(--line);border-bottom-width:2px;border-radius:3px;padding:0 4px;background:var(--surface)}
+.copy{font-family:var(--f-mono);font-size:12.5px}
+hr.soft{border:0;border-top:1px solid var(--line);margin:28px 0}
+.src li{font-size:13.5px}
+.src .small{display:inline}
+.swatches{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.sw{display:flex;align-items:center;gap:6px;font-size:12.5px}
+.sw i{display:inline-block;width:18px;height:14px;border-radius:2px;border:1px solid var(--line)}
+.sw i.hatch{background:repeating-linear-gradient(135deg,var(--hatch) 0 2px,transparent 2px 6px)}
+footer{margin-top:60px;padding-top:16px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+</style>
+
+<div class="page">
+<nav class="toc" aria-label="Contents">
+  <div class="eyebrow">Contents</div>
+  <ol>
+    <li><a href="#answer"><span class="num">00</span>The answer</a></li>
+    <li><a href="#requirements"><span class="num">01</span>Verified requirements</a></li>
+    <li><a href="#rules"><span class="num">02</span>Advance-work rules</a></li>
+    <li><a href="#research"><span class="num">03</span>Research findings</a></li>
+    <li><a href="#landscape"><span class="num">04</span>Existing solutions</a></li>
+    <li><a href="#concept"><span class="num">05</span>Three directions</a></li>
+    <li><a href="#science"><span class="num">06</span>Science method</a></li>
+    <li><a href="#data"><span class="num">07</span>Data inventory</a></li>
+    <li><a href="#validation"><span class="num">08</span>Validation</a></li>
+    <li><a href="#ux"><span class="num">09</span>UI / UX spec</a></li>
+    <li><a href="#build"><span class="num">10</span>Implementation</a></li>
+    <li><a href="#team"><span class="num">11</span>Team &amp; schedule</a></li>
+    <li><a href="#judging"><span class="num">12</span>Judging map</a></li>
+    <li><a href="#pitch"><span class="num">13</span>Pitch &amp; demo</a></li>
+    <li><a href="#critique"><span class="num">14</span>Critique &amp; revision</a></li>
+    <li><a href="#risks"><span class="num">15</span>Top risks</a></li>
+    <li><a href="#questions"><span class="num">16</span>Open questions</a></li>
+    <li><a href="#sources"><span class="num">17</span>Sources</a></li>
+  </ol>
+</nav>
+
+<main>
+<header>
+  <div class="eyebrow">NASA Space Apps 2026 · Dhaka · Challenge: Harmonization of MODIS and VIIRS Hot Spots</div>
+  <h1 style="margin-top:8px">Afterglow: a fire calendar that survives the end of MODIS</h1>
+  <p class="lede" style="margin-top:12px">Strategy, research, UI specification and execution plan for a DU final-year CSE team. Working name only. This document plans the entry; it does not implement it.</p>
+  <div class="meta-row">
+    <span>Sources checked: <b>7 Oct 2026</b> (Asia/Dhaka)</span>
+    <span>Full challenge statement due: <b>28 Oct 2026</b></span>
+    <span>Bangladesh hackathon: <b>13–14 Nov 2026</b></span>
+    <span>Global window: <b>14–15 Nov 2026</b></span>
+  </div>
+  <div class="meta-row" aria-label="Evidence labels used in this document">
+    <span><span class="tag fact">Fact</span>verified in a primary source</span>
+    <span><span class="tag claim">Research claim</span>published finding</span>
+    <span><span class="tag pre">Preprint</span>not peer reviewed</span>
+    <span><span class="tag hyp">Hypothesis</span>to be tested</span>
+    <span><span class="tag assume">Assumption</span>working premise</span>
+    <span><span class="tag rec">Recommendation</span>our call</span>
+  </div>
+</header>
+
+<!-- 00 -->
+<section id="answer">
+<h2><span class="sec-num">00 · THE ANSWER</span>Selected concept, strongest evidence, biggest uncertainty</h2>
+
+<div class="verdict">
+  <div class="vcard selected">
+    <div class="eyebrow">Selected concept</div>
+    <h3>A fleet-aware, observation-aware burning calendar</h3>
+    <p>For any area, Afterglow shows when burning was normal, unusual or critical across 2003 to now. It puts every satellite on one reference scale through calibrations learned where the sensors overlapped. It separates "no fire" from "not observed", and every verdict carries an uncertainty range.</p>
+    <p><b>Signature moment:</b> retire Terra, Aqua and Suomi NPP with one click, as will happen by late 2027. The raw calendar breaks. Afterglow's verdicts mostly hold, and where they don't, it says so.</p>
+  </div>
+  <div class="vcard">
+    <div class="eyebrow">Strongest supporting evidence</div>
+    <p><span class="tag fact">Fact</span>NASA plans to end Terra MODIS data collection in January 2027 and Aqua MODIS around September 2027. CAMS began adding VIIRS to its fire system in December 2025 for this reason.</p>
+    <p><span class="tag fact">Fact</span>Suomi NPP product delivery is scheduled to stop on 1 November 2026 (date subject to change).</p>
+    <p><span class="tag fact">Fact</span>The MODIS fire user guide warns that fire-pixel files carry no cloud or missing-data information. It also warns that time series binned at under about eight days can be severely biased.</p>
+  </div>
+  <div class="vcard">
+    <div class="eyebrow">Biggest uncertainty</div>
+    <p><span class="tag fact">Fact</span>The official FAQ says teams "are not allowed to begin working on the challenges prior to the hackathon." Doing 80% of the work early is therefore not allowed. The goal changes to <b>80% of research, decisions and rehearsal before 13 November, and none of the product.</b></p>
+    <p><span class="tag hyp">Hypothesis</span>Scientific risk: the VIIRS 750 m daily cloud mask may not be a good enough stand-in for when the 375 m product could see the ground.</p>
+  </div>
+</div>
+
+<div class="callout">
+<p><b>What Afterglow adds beyond the obvious entry.</b> The obvious entry merges hotspots on a map, adds a calendar heatmap and z-scores the counts. Afterglow adds four things that entry cannot provide.</p>
+<ol>
+<li>A "not observed" state per calendar cell, computed from NASA's daily fire masks.</li>
+<li>Anomalies that stay comparable across sensor changes, tested on held-out years.</li>
+<li>Uncertainty ranges that widen when coverage is poor or the satellite fleet is thin.</li>
+<li>Static industrial heat sources (likely including brick kilns) separated from vegetation burning.</li>
+</ol>
+<p>Branding, extra panels or a chatbot would not add anything comparable.</p>
+</div>
+</section>
+
+<!-- 01 -->
+<section id="requirements">
+<h2><span class="sec-num">01 · REQUIREMENTS</span>What is verified, what is only a summary, what must be rechecked</h2>
+<p class="prose">Only the challenge <b>summary</b> exists today. The full statement, with resources and requirements, comes out on 28 October. The global Project Submission and Judging &amp; Awards guides arrive on 13 November. So some requirements below may change.</p>
+
+<div class="tbl xwide"><table>
+<thead><tr><th>Item</th><th>What the source says</th><th>Status</th><th>Source (checked 7 Oct)</th></tr></thead>
+<tbody>
+<tr><td>Challenge task</td><td>Build a web application that harmonizes active-fire hotspot records from different sensors into a burning-activity calendar. It should let responders, scientists and land managers examine historical patterns, unusual conditions and critical periods for a selected area. Difficulty: Advanced/Intermediate. Subjects: Earth Science, Software.</td><td><span class="tag fact">Summary only</span></td><td><a href="https://www.spaceappschallenge.org/2026/challenges/harmonization-of-modis-and-viirs-hot-spots/">Challenge page</a></td></tr>
+<tr><td>Challenge author</td><td>Photo credit is CONAE (Argentina's space agency), a Space Agency Partner since 2021. Authorship by CONAE is our inference, not stated.</td><td><span class="tag hyp">Inference</span></td><td><a href="https://www.spaceappschallenge.org/2026/space-agency-partners/">Partners page</a></td></tr>
+<tr><td>Full statement</td><td>Released 28 Oct with full details, resources and requirements.</td><td><span class="tag gray">Recheck 28 Oct</span></td><td><a href="https://www.spaceappschallenge.org/resources/participant-faqs/">Participant FAQs</a> (updated 23 Sep 2026)</td></tr>
+<tr><td>Advance work</td><td>Teams may not begin working on the challenges before the hackathon.</td><td><span class="tag fact">Verified</span></td><td><a href="https://www.spaceappschallenge.org/resources/participant-faqs/">Participant FAQs</a></td></tr>
+<tr><td>Teams</td><td>1–6 members, all in the same Local Event. One team per person, one challenge per team.</td><td><span class="tag fact">Verified</span></td><td>FAQs; BD guide</td></tr>
+<tr><td>Registrations</td><td>Two separate registrations: Bangladesh pre-registration (local seat and judging) and NASA registration (team page, global judging).</td><td><span class="tag fact">Verified</span></td><td><a href="https://docs.google.com/document/d/1mSOxplyht5kii8GcCnFaGA-vMHIAVypjl4N6PobnaYQ/edit">BD participant guide</a></td></tr>
+<tr><td>Dhaka event</td><td>13–14 Nov from 07:00. Virtual, with a physical venue at AIUB, Kuratoli, Khilkhet. Local Lead: Mohammad Mahdee-uz Zaman.</td><td><span class="tag fact">Verified</span></td><td><a href="https://www.spaceappschallenge.org/2026/local-events/dhaka/">Dhaka event page</a></td></tr>
+<tr><td>Bangladesh videos</td><td>Video 1: 240 s prescreening, concept only, due 1 Oct. Video 2: 240 s local judging cut with a working demo and NASA datasets named on camera. Video 3: 30 s final video for global judging.</td><td><span class="tag gray">Conflict</span></td><td>BD guide. It lists Video 2 for both 1 Nov and 13 Nov 18:30, and Video 3 for both 09:00 (run of show) and 12:00 on 14 Nov. Confirm with the Local Lead.</td></tr>
+<tr><td>Global submission window</td><td>Opens Saturday 14 Nov 09:00 and closes Sunday 15 Nov 23:59 local time. The BD guide says to treat the end of the local event on Saturday 14 Nov as the real deadline.</td><td><span class="tag gray">Recheck 13 Nov</span></td><td><a href="https://www.spaceappschallenge.org/2026/">2026 page</a> (search snippet); BD guide</td></tr>
+<tr><td>Minimum requirements (2025 rules)</td><td>Primarily English. Responds to the selected challenge. Demo of at most 7 slides or 30 s. All links accessible without a password. Uses NASA open data. AI use declared. AI-generated content must not use NASA branding; AI images and video need a visible watermark; AI code and data must be acknowledged.</td><td><span class="tag gray">2025 version</span></td><td><a href="https://spaceapps-v2-staging.s3.amazonaws.com/media/documents/Final_Space_Apps_2025_Judging_Guidelines_for_web.pdf">2025 Judging Guidelines</a></td></tr>
+<tr><td>Global judging criteria</td><td>Impact, Creativity, Validity, Relevance and Presentation, scored holistically from 1 to 5.</td><td><span class="tag gray">2025 version</span></td><td>2025 Judging Guidelines</td></tr>
+<tr><td>Bangladesh local score sheet</td><td>Impact, Creativity, Validity, Relevance and Presentation at 1–20 each. Teamwork, User experience and NASA data usage at 1–5 each; a 5 for data usage requires NASA data plus other agency or third-party sources. Challenge named, repo access and page complete at 0/1 each. Plus a 5% bonus for teams with women members.</td><td><span class="tag fact">Verified</span></td><td>BD guide §11</td></tr>
+<tr><td>Licensing and citations</td><td>Original content must be OSI-licensed (Apache 2.0 by default). Third-party materials must be open, with licenses documented. Every source must be cited. No commercial promotion.</td><td><span class="tag fact">Verified</span></td><td><a href="https://www.spaceappschallenge.org/legal/">Terms &amp; Conditions</a> (updated 7 Aug 2026)</td></tr>
+<tr><td>Award categories</td><td>Best Use of Science, Best Use of Data, Best Use of Technology, Galactic Impact, Best Mission Concept, Most Inspirational, Best Storytelling, Global Connection, Art &amp; Technology, Local Impact.</td><td><span class="tag gray">2025 definitions</span></td><td>2025 Judging Guidelines; BD guide §12</td></tr>
+<tr><td>Under-18 rule</td><td>No recognisable names, voices or likenesses of anyone under 18 in videos or submissions.</td><td><span class="tag fact">Verified</span></td><td>T&amp;C; BD guide</td></tr>
+</tbody></table></div>
+
+<h3>Recheck calendar</h3>
+<ul class="prose">
+<li><b>28 Oct:</b> read the full statement within 24 hours and diff it against this plan. Look for required outputs, named regions or sensors, provided resources, and any restriction on the data used.</li>
+<li><b>2–3 Nov:</b> read the Space Apps Connect guide, then ask the challenge's subject-matter experts targeted questions once the hackathon starts.</li>
+<li><b>13 Nov 07:00:</b> read the Project Submission and Judging &amp; Awards guides. Update the submission checklist and the AI disclosure format.</li>
+<li><b>Now:</b> confirm the Video 2 and Video 3 times, the building start time and the deadline for editing the project page with the Local Lead in writing (see the <a href="#rules">draft email</a>).</li>
+</ul>
+</section>
+
+<!-- 02 -->
+<section id="rules">
+<h2><span class="sec-num">02 · ADVANCE WORK</span>What we may do before 13 November</h2>
+<p class="prose">The global FAQ forbids working on the challenge early. The Bangladesh guide, however, tells teams to study the datasets, download them, set up their environment and create a public repository before the event. That creates a gray zone. I sort activities by risk below; anything gray should be confirmed in writing before you do it.</p>
+
+<div class="tbl wide"><table>
+<thead><tr><th>Activity</th><th>Status</th><th>Reasoning</th></tr></thead>
+<tbody>
+<tr><td>Reading docs and papers, interviewing analysts, learning tools on unrelated data</td><td><span class="tag ok">Permitted</span></td><td>Research and skill-building are not work on the challenge.</td></tr>
+<tr><td>Concept development and the Video 1 concept pitch</td><td><span class="tag ok">Required locally</span></td><td>The BD guide asks for a concept-only Video 1.</td></tr>
+<tr><td>Team formation, roles, timed rehearsal on a <i>past</i> (2025) challenge</td><td><span class="tag ok">Permitted</span></td><td>Practice on a different problem. Do not reuse its code.</td></tr>
+<tr><td>Earthdata login, FIRMS MAP_KEY, empty public GitHub repo with LICENSE</td><td><span class="tag ok">Permitted</span></td><td>The BD checklist lists these explicitly.</td></tr>
+<tr><td>Downloading raw public NASA data to disk</td><td><span class="tag gray">Gray, confirm</span></td><td>The BD guide encourages it ("Datasets downloaded offline"). Raw downloads contain no solution work.</td></tr>
+<tr><td>Opening the files in throwaway notebooks to learn the formats</td><td><span class="tag gray">Gray, confirm</span></td><td>Counts as "studying datasets". Keep it out of the project repo and never reuse it.</td></tr>
+<tr><td>Challenge-specific high-fidelity UI design</td><td><span class="tag no">Defer</span></td><td>This document's wireframes are concept-level. Build the visual design during the event.</td></tr>
+<tr><td>Pipeline code, models, app code, processed data, demo footage</td><td><span class="tag no">During event only</span></td><td>This is the solution itself. Commit history should begin at the event start.</td></tr>
+</tbody></table></div>
+
+<h3 id="email">Draft clarification email</h3>
+<p class="small">Send from your own account to the Local Lead (mohammad.zaman@gmail.com on the event page; the guide also lists mohammad.m.zaman@gmail.com), copying info@spaceappschallenge.org. Not sent.</p>
+<pre class="wire">Subject: Dhaka 2026 – rule clarification before the hackathon (Team [name])
+
+Dear Mr Zaman,
+We are registered for the Dhaka event (Harmonization of MODIS and VIIRS Hot Spots).
+The global FAQ says teams may not begin working on challenges before the hackathon,
+while the Bangladesh guide asks us to download datasets and prepare our environment.
+Could you confirm, in writing:
+ 1. May we download raw public NASA datasets (FIRMS archives, MODIS/VIIRS fire
+    products) before 13 Nov, without processing them?
+ 2. May we open those files only to learn their formats, in notebooks we will not
+    reuse in the project?
+ 3. At what time on 13 Nov may we start writing project code?
+ 4. Is Video 2 due on 1 Nov or on 13 Nov at 18:30? Is Video 3 due at 09:00 or
+    12:00 on 14 Nov?
+ 5. Until when may we edit our NASA project page and still be judged?
+ 6. [Only if applicable] We missed the 1 Oct Video 1 deadline. Can we still submit?
+Thank you,
+[Names, roles]</pre>
+</section>
+
+<!-- 03 -->
+<section id="research">
+<h2><span class="sec-num">03 · RESEARCH</span>Findings that change the design</h2>
+<p class="prose">Each finding follows the chain evidence → why it matters → what it changes in our design. Labels show how solid each piece is.</p>
+
+<figure class="fleet" aria-labelledby="fleet-cap">
+<svg viewBox="0 0 900 262" role="img" aria-label="Timeline of the five satellites behind the FIRMS hotspot record, from 2000 to 2028, with a zoomed panel for July 2026 to December 2027 showing planned shutdowns.">
+  <text class="ttl" x="110" y="18">Full record, 2000–2028</text>
+  <text class="ttl" x="660" y="18">Zoom: Jul 2026 – Dec 2027</text>
+  <!-- grid main -->
+  <line class="grid" x1="110" y1="30" x2="110" y2="212"/><line class="grid" x1="201.1" y1="30" x2="201.1" y2="212"/><line class="grid" x1="292.1" y1="30" x2="292.1" y2="212"/><line class="grid" x1="383.2" y1="30" x2="383.2" y2="212"/><line class="grid" x1="474.3" y1="30" x2="474.3" y2="212"/><line class="grid" x1="565.4" y1="30" x2="565.4" y2="212"/>
+  <line class="axis" x1="110" y1="212" x2="620" y2="212"/>
+  <text x="110" y="228" text-anchor="middle">2000</text><text x="201.1" y="228" text-anchor="middle">2005</text><text x="292.1" y="228" text-anchor="middle">2010</text><text x="383.2" y="228" text-anchor="middle">2015</text><text x="474.3" y="228" text-anchor="middle">2020</text><text x="565.4" y="228" text-anchor="middle">2025</text>
+  <!-- lane labels -->
+  <text class="lab" x="102" y="54" text-anchor="end">Terra MODIS</text>
+  <text class="lab" x="102" y="89" text-anchor="end">Aqua MODIS</text>
+  <text class="lab" x="102" y="124" text-anchor="end">Suomi NPP VIIRS</text>
+  <text class="lab" x="102" y="159" text-anchor="end">NOAA-20 VIIRS</text>
+  <text class="lab" x="102" y="194" text-anchor="end">NOAA-21 VIIRS</text>
+  <!-- bars main (solid to today 597.6) -->
+  <rect class="bm" x="125.1" y="43" width="472.5" height="14" rx="2"/>
+  <rect class="pm" x="597.6" y="43" width="4.2" height="14"/>
+  <rect class="bm" x="155.5" y="78" width="442.1" height="14" rx="2" opacity=".8"/>
+  <rect class="pm" x="597.6" y="78" width="16.3" height="14"/>
+  <rect class="bv" x="329.5" y="113" width="268.1" height="14" rx="2"/>
+  <rect class="pv" x="597.6" y="113" width="1.2" height="14"/>
+  <rect class="bv" x="474.3" y="148" width="123.3" height="14" rx="2" opacity=".85"/>
+  <rect class="pv" x="597.6" y="148" width="22.4" height="14"/>
+  <rect class="bv" x="547.9" y="183" width="49.7" height="14" rx="2" opacity=".7"/>
+  <rect class="pv" x="597.6" y="183" width="22.4" height="14"/>
+  <line class="today" x1="597.6" y1="30" x2="597.6" y2="212"/>
+  <text x="597.6" y="244" text-anchor="middle" style="fill:var(--accent)">today</text>
+  <!-- zoom panel -->
+  <line class="grid" x1="660" y1="30" x2="660" y2="212"/><line class="grid" x1="733.3" y1="30" x2="733.3" y2="212"/><line class="grid" x1="806.7" y1="30" x2="806.7" y2="212"/><line class="grid" x1="880" y1="30" x2="880" y2="212"/>
+  <line class="axis" x1="660" y1="212" x2="880" y2="212"/>
+  <text x="660" y="228" text-anchor="middle">Jul 26</text><text x="733.3" y="228" text-anchor="middle">Jan 27</text><text x="806.7" y="228" text-anchor="middle">Jul 27</text><text x="880" y="228" text-anchor="middle">Jan 28</text>
+  <rect class="bm" x="660" y="43" width="39.2" height="14"/><rect class="pm" x="699.2" y="43" width="34.1" height="14"/><rect class="end" x="732.3" y="41" width="2" height="18"/>
+  <text x="739" y="54">Jan 2027</text>
+  <rect class="bm" x="660" y="78" width="39.2" height="14" opacity=".8"/><rect class="pm" x="699.2" y="78" width="132.4" height="14"/><rect class="end" x="830.6" y="76" width="2" height="18"/>
+  <text x="836" y="89">~Sep 27</text>
+  <rect class="bv" x="660" y="113" width="39.2" height="14"/><rect class="pv" x="699.2" y="113" width="9.9" height="14"/><rect class="end" x="708.1" y="111" width="2" height="18"/>
+  <text x="716" y="124">1 Nov 2026</text>
+  <rect class="bv" x="660" y="148" width="39.2" height="14" opacity=".85"/><rect class="pv" x="699.2" y="148" width="180.8" height="14"/>
+  <rect class="bv" x="660" y="183" width="39.2" height="14" opacity=".7"/><rect class="pv" x="699.2" y="183" width="180.8" height="14"/>
+  <line class="today" x1="699.2" y1="30" x2="699.2" y2="212"/>
+  <line class="hack" x1="714" y1="30" x2="714" y2="212"/>
+  <text x="699.2" y="244" text-anchor="end" style="fill:var(--accent)">today</text>
+  <text x="716" y="244">hackathon</text>
+  <text x="110" y="258">Solid = delivered · dashed = planned · red tick = planned end of data</text>
+</svg>
+<figcaption id="fleet-cap">The satellites behind the FIRMS hotspot record. Start dates are when each satellite's data begins in FIRMS: Terra Nov 2000, Aqua Jul 2002, S-NPP 20 Jan 2012, NOAA-20 1 Jan 2020, NOAA-21 17 Jan 2024. End dates are announced plans: Terra Jan 2027, Aqua ~Sep 2027 (CAMS, Feb 2026), S-NPP 1 Nov 2026 (Earthdata, Aug 2026). Drawn to scale. This chart is a planning illustration; it is not the product.</figcaption>
+</figure>
+
+<h3>A. The satellite fleet is changing during the hackathon</h3>
+<div class="finding"><h4>Three of five record-keeping satellites stop within about ten months</h4><div class="chain">
+<span class="k">Evidence</span><span><span class="tag fact">Fact</span>Terra MODIS data collection ends January 2027 and Aqua around September 2027. Both are drifting out of their designed orbits. Suomi NPP delivery stops 1 November 2026. CAMS added VIIRS to its fire system on 4 December 2025 to prepare.</span>
+<span class="k">Matters</span><span>From 2027, every "is this year unusual?" judgement compares NOAA-20/21 VIIRS observations against a baseline that MODIS and S-NPP mostly built. Done naively, it compares two different instruments.</span>
+<span class="k">Changes</span><span><span class="tag rec">Recommendation</span>Make fleet transition the central problem and the demo hook. Build calibration "bridges" through the overlap years: NOAA-20 → S-NPP (2020–2026), then S-NPP → Aqua (2012–2026).</span>
+</div></div>
+
+<div class="finding"><h4>Operational systems already rely on a single "reference satellite", and Aqua is that satellite</h4><div class="chain">
+<span class="k">Evidence</span><span><span class="tag fact">Fact</span>A July 2026 panel from INPE's Programa Queimadas maps accumulated fire foci from its reference satellite "AQUA_M-T", visible in a search snippet. I could not open the PDF, so INPE's transition plan is unknown.</span>
+<span class="k">Matters</span><span>Analysts keep series comparable by sticking to one sensor. When Aqua ends, that practice breaks unless someone provides a calibrated successor.</span>
+<span class="k">Changes</span><span>Use Aqua MODIS as Afterglow's reference scale: units are "Aqua-MODIS-equivalent detections". This matches the analyst practice and Aqua shares VIIRS's early-afternoon overpass.</span>
+</div></div>
+
+<h3>B. "No detection" is not "no fire"</h3>
+<div class="finding"><h4>Hotspot files carry no information about clouds or missing data</h4><div class="chain">
+<span class="k">Evidence</span><span><span class="tag fact">Fact</span>The MODIS C6 user guide (§7.1.1) warns that fire-pixel location files contain no cloud or missing-data information, which can produce misleading or even incorrect results. The FIRMS FAQ points users to Level-3 or CMG products when cloud and missing data matter.</span>
+<span class="k">Matters</span><span>In monsoon Bangladesh, an empty July may be cloud, not a lack of fire. A raw calendar would call it "below normal".</span>
+<span class="k">Changes</span><span>Compute clear-view coverage from the daily L3 fire masks (MOD14A1, MYD14A1, VNP14A1, VJ114A1, VJ214A1). Their classes include cloud (4), non-fire land (5) and fire (7–9). Show a hatched "No clear view" state instead of a colour.</span>
+</div></div>
+
+<div class="finding"><h4>Daily MODIS calendars are biased by orbit sampling</h4><div class="chain">
+<span class="k">Evidence</span><span><span class="tag fact">Fact</span>The same guide warns of severe temporal and spatial biases in MODIS fire time series using intervals shorter than about eight days.</span>
+<span class="k">Matters</span><span>A day-by-day "burning calendar" invites wrong conclusions.</span>
+<span class="k">Changes</span><span>The anomaly calendar uses 8-day periods aligned to the MODIS L3 compositing (46 per year). Daily raw detections stay available in the period inspector as evidence, not as verdicts.</span>
+</div></div>
+
+<div class="finding"><h4>NASA already has a cloud-corrected MODIS fire count we can check against</h4><div class="chain">
+<span class="k">Evidence</span><span><span class="tag fact">Fact</span>The MODIS CMG products (MOD14CMQ/MYD14CMQ, 0.25°, monthly and 8-day) include a "CloudCorrFirePix" layer. Giglio, Csiszar &amp; Justice (2006) used corrected counts to map fire seasonality: peak month, season length and periodicity.</span>
+<span class="k">Matters</span><span>Our coverage correction is not new for MODIS. What is new is applying it consistently across VIIRS and MODIS and exposing it per period in the UI.</span>
+<span class="k">Changes</span><span>Use a 0.25° grid to match CMG, validate our MODIS coverage correction against CloudCorrFirePix, and cite this as the method's foundation. If our own L3 ingest fails, CMG is the fallback for MODIS.</span>
+</div></div>
+
+<h3>C. The MODIS–VIIRS gap is large and not constant</h3>
+<div class="finding"><h4>Published ratios vary by region and land type</h4><div class="chain">
+<span class="k">Evidence</span><span><span class="tag claim">Research claim</span>The published ratios differ by study and region:</span>
+<span class="k"></span><span><ul style="margin:0">
+<li>Punjab croplands: VIIRS detected 4.8× more fires than Terra+Aqua and 6.5× more than Aqua (Vadrevu &amp; Lasko 2018).</li>
+<li>South/Southeast Asia: about 7× and 5× (Vadrevu et al. 2019).</li>
+<li>Northeast Asia, matched within 5 minutes: MODIS missed 65% of VIIRS fire pixels in forests and 83% in low-biomass land (Fu et al. 2020).</li>
+<li>Africa: MODIS underestimated daily FRP by at least 42.8%, varying with view angle and grid size (Li et al. 2020).</li>
+</ul></span>
+<span class="k">Matters</span><span>One global "multiply MODIS by 4" factor is wrong, and wrong in ways that depend on the place, the land type and the sensor geometry.</span>
+<span class="k">Changes</span><span>Calibrate bridges per stratum (region cluster × land-cover class × day/night). Test a single constant ratio explicitly as a baseline that should lose.</span>
+</div></div>
+
+<div class="finding"><h4>VIIRS has a MODIS-like product and a high-resolution one</h4><div class="chain">
+<span class="k">Evidence</span><span><span class="tag fact">Fact</span>The VIIRS C2 user guide (v1.2, June 2025) makes four relevant points:</span>
+<span class="k"></span><span><ul style="margin:0">
+<li>VNP14 (750 m) adapts the MODIS C6 algorithm and performs "more comparable to" Aqua MODIS.</li>
+<li>VNP14IMG (375 m, the one FIRMS distributes) found about 3× more daytime and about 17× more night-time fire pixels than VNP14 globally in 2021.</li>
+<li>A Lower Mekong example on 1 Mar 2016: Terra 606, S-NPP 9,643, Aqua 361 daytime fire pixels.</li>
+<li>The 375 m swath fire mask has 10 classes, including cloud, bow-tie deletion and glint.</li>
+</ul></span>
+<span class="k">Matters</span><span>Night-time detections differ the most. Day and night must be modelled separately.</span>
+<span class="k">Changes</span><span>Bridges are fitted separately for day and night. The 750 m L3 masks provide the coverage denominator for VIIRS, explicitly labelled as a proxy for 375 m observability.</span>
+</div></div>
+
+<div class="finding"><h4>Duplicate detections and view angle distort counts</h4><div class="chain">
+<span class="k">Evidence</span><span><span class="tag fact">Fact</span>VIIRS residual bow-tie fire pixels are flagged in the L2 algorithm QA (bit 22) so FRP is not double-counted. MODIS pixels grow strongly toward the swath edge, while VIIRS limits pixel growth (FIRMS FAQ). <span class="tag claim">Research claim</span>Fu et al. (2020) and Zheng et al. (2026) both remove duplicate detections before comparing sensors.</span>
+<span class="k">Matters</span><span>Raw pixel counts inflate with geometry, not burning.</span>
+<span class="k">Changes</span><span>Deduplicate VIIRS pixels within the same overpass. Use scan/track (pixel size) as a covariate. Report "fire-pixel detections", never "fires".</span>
+</div></div>
+
+<h3>D. Not every hotspot is a vegetation fire</h3>
+<div class="finding"><h4>Static industrial sources contaminate calendars</h4><div class="chain">
+<span class="k">Evidence</span><span><span class="tag fact">Fact</span>Science-quality monthly files carry a <code>type</code> field: 0 vegetation, 1 volcano, 2 other static land source, 3 offshore. A bug mislabelled type-2 sources as type-0 in VIIRS versions 1–2; it was fixed in version 3 (May 2025). The MODIS guide notes that static sources are incompletely flagged. FIRMS publishes a Static Thermal Anomalies mask built on a 400 m grid from 2023 S-NPP data. NRT data has no type attribution.</span>
+<span class="k">Matters</span><span><span class="tag hyp">Hypothesis</span>Bangladesh brick kilns operate through the dry season (roughly Nov–Apr), the same months as vegetation burning. They may appear as persistent hotspots and inflate "burning" in central districts.</span>
+<span class="k">Changes</span><span>Use the <code>type</code> field from SP data where present, plus our own 400 m persistence filter, which a grid hash computes in O(n). Show excluded counts in the inspector with a toggle to include them. Verify a sample against imagery.</span>
+</div></div>
+
+<h3>E. Users and workflows</h3>
+<div class="finding"><h4>Who decides what</h4><div class="chain">
+<span class="k">Evidence</span><span><span class="tag fact">Fact</span>The challenge names early-warning and emergency responders, scientists and land managers. GFW (now Global Nature Watch) offers weekly fire alerts compared with the historical average and "significant fires" views (blog, 2020). CONAE runs a hotspot catalogue and the GeoAvisos email alerts for MODIS and NPP hotspots. <span class="tag claim">Research claim</span>In the Chittagong Hill Tracts, 88% of wildland fires are attributed to shifting (jhum) cultivation (Farukh et al. 2023). Jhum slash-and-burn runs January to May (ICIMOD record).</span>
+<span class="k">Matters</span><span><span class="tag hyp">Hypothesis</span>A district-level analyst's real question is: "Is this season's burning unusual enough to escalate, and can I defend that conclusion?" The defence is what current tools don't support across sensor changes.</span>
+<span class="k">Changes</span><span>Design the main view around one verdict sentence with evidence. Before 28 Oct, interview at least three analysts or experts (for example forestry, geography or disaster-management faculty, or contacts from the Local Lead). Treat every user need as a hypothesis until then.</span>
+</div></div>
+</section>
+
+<!-- 04 -->
+<section id="landscape">
+<h2><span class="sec-num">04 · LANDSCAPE</span>Existing solutions and the gap</h2>
+<p class="prose">An unsuccessful search is not proof that something does not exist. The rows describe what I could verify on 7 October. Project descriptions from other teams are their own claims, not verified capabilities.</p>
+<div class="tbl xwide"><table>
+<thead><tr><th>Solution</th><th>Capability</th><th>Unresolved problem</th><th>Evidence</th><th>Afterglow's improvement</th><th>Remaining uncertainty</th></tr></thead>
+<tbody>
+<tr><td>NASA FIRMS Fire Map, archive and API</td><td>NRT and SP hotspots for MODIS and VIIRS; area API (1–5 days per call, 5,000 transactions per 10 min); country yearly CSVs; alerts; Static Thermal Anomalies layer</td><td>No cross-sensor harmonized calendar and no per-period coverage; points carry no cloud information</td><td>FIRMS FAQ; API page</td><td>Built on FIRMS. Adds coverage, bridges, intervals and anomaly verdicts</td><td>FIRMS may add similar features as MODIS ends</td></tr>
+<tr><td>Global Forest Watch / Global Nature Watch fire dashboards</td><td>Weekly VIIRS alerts against the historical average; cumulative seasons back to the early 2000s; significant-fire views</td><td>Compares within sensors or merges records; no coverage-aware "not observed" state; no published transition-consistency test (as far as I found)</td><td>GFW blog 2020; GNW rebrand Sep 2026</td><td>Fleet-aware baseline, coverage state, uncertainty</td><td>Current methodology docs not reviewed in depth. Read them before the pitch.</td></tr>
+<tr><td>GWIS (JRC) country profiles and seasonal trends</td><td>Burned area, fire counts and seasonality 2002–2019; weekly NRT trends combining MODIS and VIIRS</td><td>Burned-area-centred; active-fire anomaly not harmonized per period</td><td>GWIS applications page</td><td>Hotspot-based calendar with explicit sensor bridging</td><td>Newer GWIS features may overlap</td></tr>
+<tr><td>CONAE hotspot catalogue, Geoportal, GeoAvisos</td><td>Query and alert MODIS and VIIRS hotspots for Argentina and Latin America</td><td>Sensor-specific counts; no harmonized calendar seen</td><td>CONAE catalogue and GeoAvisos pages</td><td>A tool the likely challenge author could use directly</td><td>Internal CONAE tools are unknown</td></tr>
+<tr><td>INPE BDQueimadas</td><td>Reference-satellite (Aqua) series for consistent trends</td><td>The reference satellite retires around September 2027</td><td>INPE panel snippet</td><td>Calibrated successor scale</td><td>INPE's own transition plan is unknown</td></tr>
+<tr><td>CAMS GFAS</td><td>Adds VIIRS 750 m FRP to fire emissions from Dec 2025; Sentinel-3 next</td><td>Built for emissions modelling, not area calendars for managers</td><td>CAMS news, Feb 2026</td><td>User-facing calendar and decision support</td><td>None material</td></tr>
+<tr><td>MODIS CMG CloudCorrFirePix</td><td>Cloud-corrected MODIS fire counts at 0.25°</td><td>MODIS only; ends with MODIS</td><td>MODIS user guide</td><td>Extends the idea across VIIRS</td><td>Correction details to read in the user guide</td></tr>
+<tr><td>Zheng et al. 2026 (Remote Sensing)</td><td>MYD14 + VNP14IMG fused FRP 2012–2024: duplicate correction, matched pairs, VIIRS cloud correction, view-angle-based MODIS correction, Landsat validation</td><td>A dataset for scientists, not a calendar tool; S-NPP-based, so it does not bridge to NOAA-20/21</td><td>Paper abstract</td><td>Cite as method support. Add the NOAA-20 bridge and a UI</td><td>Full method not read. Read it before the pitch.</td></tr>
+<tr><td>Other 2026 teams on this challenge</td><td>Many teams worldwide (Indonesia, Nigeria, Germany, Senegal, India, Egypt, Lebanon and others). One describes tackling duplicate alerts.</td><td>Expect many "merge + dedupe + map + heatmap" entries</td><td>Find-a-team search results</td><td>Fleet-transition framing, coverage state, held-out validation</td><td>Strong teams may converge on similar ideas</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- 05 -->
+<section id="concept">
+<h2><span class="sec-num">05 · CONCEPT</span>Three directions, one choice</h2>
+
+<div class="tbl xwide"><table>
+<thead><tr><th></th><th>A. Fleet-proof calendar (selected)</th><th>B. Disagreement explainer</th><th>C. Burn-season planner</th></tr></thead>
+<tbody>
+<tr><td>Primary user and decision</td><td>Regional fire or land analyst: is this period's burning unusual enough to escalate, and is the verdict robust to which satellites and how much cloud?</td><td>Fire scientist or emissions modeller: which record or trend can I trust for this region?</td><td>District forest officer: when should pre-season patrols and awareness work start this year?</td></tr>
+<tr><td>Current workflow and weakness</td><td>FIRMS points or GFW weekly alerts against an average, or a reference satellite (INPE). Weakness: counts mix fleet and cloud effects, and the reference retires.</td><td>One-off matching scripts per paper (Fu 2020, Zheng 2026). Not interactive or reusable.</td><td>Experience-based calendars <span class="tag hyp">Hypothesis</span>, not quantified.</td></tr>
+<tr><td>Contribution</td><td>Observation-aware rates, overlap bridges to one reference scale, uncertainty-aware verdicts, fleet stress test</td><td>Per-area breakdown of the MODIS–VIIRS gap into sensitivity/FRP, overpass time, coverage, view angle and static sources</td><td>Season onset, peak, end and length per year with variability; early/late flags</td></tr>
+<tr><td>Role of NASA data</td><td>Core: FIRMS SP and NRT, L3 fire masks, Worldview links</td><td>Core: L2/L3 fire products, matched pairs</td><td>Core, but depends on A's harmonized record</td></tr>
+<tr><td>Memorable demo</td><td>"Retire the satellites": the raw calendar breaks, the harmonized one holds</td><td>A waterfall turning "VIIRS sees 6.5× more" into named causes</td><td>"Jhum season starts N days earlier than in 2005" (unverified)</td></tr>
+<tr><td>Feasibility and dependencies</td><td>Medium-high. Needs L3 mask access and two overlap bridges.</td><td>Medium-low. Needs L2 swath data and matched-pair engineering; attribution is hard to identify.</td><td>Medium. Needs A first; a long consistent record is A's job.</td></tr>
+<tr><td>Largest failure risk</td><td>Coverage data volume, or bridges unstable in low-fire strata</td><td>Unfinished science after 26 hours; weak link to the "calendar" requirement</td><td>Overclaiming prediction; trend claims built on an unharmonized record</td></tr>
+<tr><td>Challenge alignment</td><td>Direct: calendar, harmonization, unusual conditions, critical periods</td><td>Partial: harmonization insight without the calendar</td><td>Partial: critical periods, but harmonization is implicit</td></tr>
+<tr><td>Scientific credibility</td><td>High if validated on held-out years; method traceable to NASA CMG practice</td><td>Highest ceiling, highest risk of overreach</td><td>Moderate; easy to overstate</td></tr>
+<tr><td>Differentiation</td><td>Strong: the fleet framing is timely and absent from the tools found</td><td>Strong, but niche</td><td>Moderate</td></tr>
+</tbody></table></div>
+
+<div class="callout"><p><span class="tag rec">Recommendation</span><b>Choose A.</b> Bring in C's "critical window" as the season-profile view, and B's per-satellite evidence as the period inspector.</p>
+<p><b>Tradeoff:</b> B is more novel scientifically, but it answers a scientist's question rather than the challenge's calendar requirement, and it is unlikely to be finished in about 26 hours. A gives judges a decision they can watch being made, on top of science we can defend.</p></div>
+
+<h3>Baseline we must beat, and what Afterglow adds</h3>
+<p class="prose"><b>Baseline (we build it too, as the control):</b> a hotspot map plus a years × periods calendar of raw detections (MODIS + VIIRS merged, or VIIRS only), with a z-score against the historical mean.</p>
+<ol class="prose">
+<li><b>Coverage:</b> every cell says whether the ground was actually seen. Low coverage shows as "No clear view", not as "low fire".</li>
+<li><b>Continuity:</b> verdicts are on one reference scale, so 2026 (NOAA-20) can be judged against 2003–2022 (mostly MODIS). This is tested on held-out years.</li>
+<li><b>Honesty:</b> 80% and 95% ranges that widen with poor coverage, thin bridges or a reduced fleet. Verdicts use the probability of exceeding the baseline, not a point value.</li>
+<li><b>Cleaner signal:</b> static industrial sources are separated from vegetation burning, with counts shown.</li>
+</ol>
+
+<h3>Central contribution as a testable claim</h3>
+<div class="callout science">
+<p><b>Claim H1.</b> We will test this on held-out years 2023–2026 in at least two contrasting regions (Bangladesh, plus Punjab or the Paraná Delta). We compute 8-day anomaly classes (below / typical / above) from NOAA-20 data alone through Afterglow's bridges. We expect these to agree with classes computed from Aqua MODIS against its own 2003–2022 baseline better than four baselines:</p>
+<ul>
+<li>(a) raw NOAA-20 counts against the MODIS baseline;</li>
+<li>(b) a single constant VIIRS/MODIS ratio;</li>
+<li>(c) per-region-month ratios without coverage normalization;</li>
+<li>(d) a short NOAA-20-only baseline (2020–2022).</li>
+</ul>
+<p>We also expect Afterglow's 80% ranges to contain the Aqua-observed value in 70–90% of held-out cell-periods.</p>
+<p><b>How we evaluate it:</b> Cohen's κ for class agreement, with 95% confidence intervals from a year-block bootstrap, plus empirical coverage of the ranges.</p>
+<p><b>What would disprove it:</b> if κ(Afterglow) − κ(b) has a confidence interval that includes zero in both regions, the bridge model adds nothing over a constant ratio. If interval coverage falls below 60% or above 97%, the ranges are miscalibrated. If coverage normalization does not reduce the correlation between anomalies and clear-view fraction, the "not observed" contribution is cosmetic. Each outcome would be reported, not hidden.</p>
+<p><b>Caveat:</b> the Aqua-observed class is the target of a <i>continuity</i> claim. It is not ground truth about fire.</p>
+</div>
+</section>
+
+<!-- 06 -->
+<section id="science">
+<h2><span class="sec-num">06 · SCIENCE</span>A defensible method</h2>
+
+<h3>What the prototype addresses, and what stays unresolved</h3>
+<div class="two">
+<div class="box"><h4>Addressed</h4><ul>
+<li>Detection sensitivity and resolution, through bridges stratified by land cover and day/night (and FRP in the advanced method)</li>
+<li>Observation coverage, through clear-view land km²-days from L3 masks</li>
+<li>Overpass-time differences: Terra morning vs afternoon sensors via separate bridges; NOAA-20's roughly 50 minutes earlier crossing via the NOAA-20 → S-NPP bridge</li>
+<li>Repeated detections, through VIIRS same-overpass deduplication</li>
+<li>Static sources, through the type field plus a persistence filter</li>
+<li>Processing versions: SP science archive only for the baseline (MODIS C6.1, VIIRS C2 v3); NRT labelled provisional</li>
+</ul></div>
+<div class="box"><h4>Unresolved (shown as limitations)</h4><ul>
+<li>The 375 m observability proxy: VIIRS coverage comes from the 750 m L3 mask</li>
+<li>L3 daily masks are maximum composites, so the number of looks per day is not counted</li>
+<li>Fires under cloud are assumed to burn at the clear-sky rate; rain suppresses fire, so this can overestimate</li>
+<li>Aqua's own orbit drift in later years (a reference-scale threat)</li>
+<li>View-angle effects only approximated; full scan geometry needs L2 data</li>
+<li>No independent ground truth for Bangladesh</li>
+</ul></div>
+</div>
+
+<h3>Distinctions the product must keep explicit</h3>
+<div class="tbl wide"><table>
+<thead><tr><th>Do not conflate</th><th>How Afterglow keeps them apart</th></tr></thead>
+<tbody>
+<tr><td>Thermal detections vs individual fires</td><td>The unit is "fire-pixel detections". Never "fires".</td></tr>
+<tr><td>Active fire vs burned area or perimeter</td><td>No area-burned claims. MCD64A1 is used only to check seasonal timing.</td></tr>
+<tr><td>No hotspot vs no valid observation</td><td>The "No clear view" hatch, plus coverage % shown in every tooltip and inspector.</td></tr>
+<tr><td>Confidence class vs probability</td><td>Shown as a filter label (low/nominal/high or 0–100) only. Never presented as a probability.</td></tr>
+<tr><td>Sensor agreement vs ground truth</td><td>Validation copy says "agrees with Aqua MODIS", never "accurate".</td></tr>
+<tr><td>Historical anomaly vs prediction</td><td>"Unusual compared with 2003–2022." No forecasts. "Critical window" is the historical typical peak.</td></tr>
+</tbody></table></div>
+
+<h3>Method</h3>
+<div class="eq">s ∈ {Terra, Aqua, S-NPP, NOAA-20, NOAA-21}   c = 0.25° cell   p = 8-day period (46/yr)   y = year
+D[s,c,p]  vegetation fire-pixel detections (type 0, confidence ≥ nominal, deduplicated, static-masked)
+O[s,c,p]  clear-view land km²-days = Σ_days Σ_1km-land-cells 1[FireMask ∈ {5,7,8,9}]  from the sensor's L3 mask
+f[s,c,p]  coverage = O / (land km² × days)
+ρ[s,c,p]  observation-aware rate = D / O   (detections per 1,000 clear-view km²-days)
+
+Bridge (simple method, must-have), fitted only on training years where both sensors observe:
+  D_ref ~ NegBin(μ, φ),   log μ = log O_ref + α[k,dn] + β[k,dn] · log(ρ_s + ε) + season[k]
+  k = stratum (region cluster × land-cover class), dn = day/night
+  chain: NOAA-21 → NOAA-20 → S-NPP → Aqua (reference); Terra → Aqua directly
+Harmonized index H[c,p,y] = inverse-variance combination (log scale) of each available sensor's
+  Aqua-equivalent estimate; 80/95% ranges by parametric + year-block bootstrap (1,000 draws)
+Verdict: baseline B = {H[c,p±1,y']: y' in baseline years, y' ≠ y}
+  P_hi = Pr(H > q90(B)) from draws  →  ≥0.9 "Unusually high" · 0.6–0.9 "Possibly high" · else "Typical"
+  (symmetric for low, shown only where q10(B) is above a minimum activity level)
+  f < 0.30 for all sensors, or range wider than threshold  →  "Not enough clear views"</div>
+
+<h4>Advanced method (stretch, gated): a sensor-response model</h4>
+<p class="prose">Use near-simultaneous Aqua and S-NPP afternoon overpasses (|Δt| ≤ 10 min, before Aqua's drift grows). Merge 375 m VIIRS pixels into roughly 1 km footprint clusters with a grid hash and union-find. Label each cluster as detected or missed by MODIS, counting only where MYD14A1 shows the cell observed. Then fit P(MODIS detects | cluster FRP, pixel count, view angle, land cover, day/night).</p>
+<p class="prose">The Aqua-equivalent count is Σp, with Poisson-binomial variance Σp(1−p) plus parameter uncertainty. This handles resolution and sensitivity physically rather than through ratios. It mirrors the matching used by Fu et al. 2020 and Zheng et al. 2026.</p>
+<p class="prose"><b>ML policy:</b> start with logistic regression with splines; try gradient boosting only if held-out Brier score and log-loss improve and the reliability diagram stays calibrated. <b>Gate:</b> only attempt this if the simple method is validated by 23:00 on Friday.</p>
+
+<h4>How the algorithm helps the user</h4>
+<p class="prose">Fewer false "unusual" verdicts when satellites change or clouds persist. Analysts can say how sure they are, and see when the tool cannot judge. The overlap bridges also mean the 2027+ NOAA-20/21 era stays comparable to the 25-year record.</p>
+</section>
+
+<!-- 07 -->
+<section id="data">
+<h2><span class="sec-num">07 · DATA</span>Inventory, access and cost</h2>
+<p class="prose">Science-quality (SP) archives arrive 2–3 months late and anchor every baseline and bridge. Near-real-time (NRT) data covers the latest days and is always labelled provisional. Volumes are estimates; verify them during the permitted download window.</p>
+<div class="tbl xwide"><table>
+<thead><tr><th>Dataset</th><th>Key fields</th><th>Access / auth</th><th>Coverage</th><th>License</th><th>Use</th><th>Cost to verify</th></tr></thead>
+<tbody>
+<tr><td>FIRMS MODIS C6.1 SP (MCD14ML subset)</td><td>lat, lon, acq_date/time, satellite, scan, track, confidence 0–100, frp, daynight, type, version</td><td>FIRMS Archive Download, country yearly CSV, API <code>MODIS_SP</code> (free MAP_KEY), UMD SFTP MCD14ML</td><td>Terra Nov 2000+, Aqua Jul 2002+; SP lag 2–3 months</td><td>NASA open data; cite FIRMS/LANCE</td><td>D (MODIS)</td><td>Small per region (MB). Check the type column on first download.</td></tr>
+<tr><td>FIRMS VIIRS C2 SP; VxxIMGML monthly</td><td>as above + bright_ti4/ti5, confidence l/n/h; IMGML adds VZA, PixArea, Type (v3)</td><td>FIRMS archive / API <code>VIIRS_SNPP_SP</code>, <code>VIIRS_NOAA20_SP</code>; UMD SFTP (public login documented in the user guide)</td><td>S-NPP 20 Jan 2012+, NOAA-20 2020+ in FIRMS, NOAA-21 2024+ (SP availability to verify)</td><td>NASA open</td><td>D (VIIRS), FRP</td><td>Global IMGML monthly files are large; filter by bounding box while streaming</td></tr>
+<tr><td>FIRMS NRT</td><td>same fields, no type</td><td>API area endpoint, 1–5 days per call, 5,000 transactions per 10 min</td><td>Last ~2 months</td><td>NASA open</td><td>Provisional latest periods</td><td>Negligible</td></tr>
+<tr><td>Daily L3 fire masks: MOD14A1/MYD14A1 C6.1; VNP14A1/VJ114A1/VJ214A1 v002</td><td>FireMask (0–9 incl. 4 cloud, 5 land, 7–9 fire), QA (land/water, day/night), MaxFRP</td><td>LP DAAC (Earthdata Login), Earthdata Search; AppEEARS area subsetting (product support to verify); Planetary Computer (MOD14A1 COGs); Earth Engine</td><td>1 km sinusoidal tiles; Bangladesh needs about h25v06 + h26v06 (to verify)</td><td>NASA open</td><td>O (coverage)</td><td><b>Largest item.</b> VIIRS L3 is daily per tile. Use server-side subsetting and limit years.</td></tr>
+<tr><td>MODIS CMG (MOD14CMQ/C8Q)</td><td>CloudCorrFirePix, 0.25°</td><td>UMD SFTP</td><td>2000+</td><td>NASA open</td><td>Validate MODIS coverage correction; fallback</td><td>Small</td></tr>
+<tr><td>VNP14IMG / VJ114IMG L2 swath</td><td>375 m fire mask incl. cloud, glint, bow-tie</td><td>LP DAAC, LAADS</td><td>6-minute granules</td><td>NASA open</td><td>Stretch: check the 750 m proxy on sample days</td><td>Large; sample only</td></tr>
+<tr><td>MCD64A1 burned area</td><td>Burn date, 500 m monthly</td><td>LP DAAC</td><td>2000+</td><td>NASA open</td><td>Independent-algorithm timing check</td><td>Moderate</td></tr>
+<tr><td>ESA WorldCover 10 m</td><td>Land-cover classes</td><td>ESA (open)</td><td>2020/2021</td><td>CC BY 4.0</td><td>Bridge strata; other-agency data for the local score sheet</td><td>Moderate; aggregate once</td></tr>
+<tr><td>geoBoundaries</td><td>Admin units</td><td>Open download</td><td>Global</td><td>CC BY 4.0 for most countries (check per country)</td><td>Area selection</td><td>Small</td></tr>
+<tr><td>NASA Worldview / GIBS</td><td>Imagery layers by date</td><td>Public URLs</td><td>Global, daily</td><td>NASA open</td><td>Verification links in the inspector; optional basemap</td><td>None</td></tr>
+</tbody></table></div>
+<p class="small">Accounts: Earthdata Login (free) and FIRMS MAP_KEY (free). Each person creates their own; keys never go in the repo or the app bundle.</p>
+</section>
+
+<!-- 08 -->
+<section id="validation">
+<h2><span class="sec-num">08 · VALIDATION</span>Designed before any result</h2>
+
+<h3>Regions and periods</h3>
+<div class="tbl wide"><table>
+<thead><tr><th>Region</th><th>Why it contrasts</th><th>Role</th></tr></thead>
+<tbody>
+<tr><td>Bangladesh, focusing on the Chittagong Hill Tracts and central districts</td><td>Monsoon cloud, small jhum and agricultural fires, possible brick-kiln static sources</td><td>Local demo, plus training and testing</td></tr>
+<tr><td>Punjab, India (Indo-Gangetic plain)</td><td>Intense crop-residue burning in Oct–Nov; published VIIRS/MODIS ratios to sanity-check against</td><td>Second test region</td></tr>
+<tr><td>Paraná Delta, Argentina</td><td>Southern-hemisphere wetland fires; likely relevant to CONAE; documented extreme 2020 season <span class="tag hyp">to verify</span></td><td>Spatial hold-out (stretch)</td></tr>
+</tbody></table></div>
+
+<h3>Splits and leakage safeguards</h3>
+<ul class="prose">
+<li><b>Temporal:</b> fit the S-NPP → Aqua bridge on 2012–2018 and the NOAA-20 → S-NPP bridge on 2020–2022. Test on 2023–2026. No tuning on test years.</li>
+<li><b>Spatial:</b> leave one region out. Fit strata on two regions and test transfer to the third.</li>
+<li><b>Baselines:</b> computed leave-one-year-out, so a test year never enters its own baseline.</li>
+<li><b>Static mask:</b> build from training years only. Note that FIRMS's mask uses 2023 data.</li>
+<li><b>Reproducibility:</b> pipeline runs from raw files with pinned versions. Validation numbers are written to <code>validation.json</code> by code and never typed by hand.</li>
+</ul>
+
+<h3>Which reference data are independent</h3>
+<div class="tbl wide"><table>
+<thead><tr><th>Reference</th><th>Independent of</th><th>Not independent of</th><th>Supports</th></tr></thead>
+<tbody>
+<tr><td>Aqua MODIS same-sensor anomalies</td><td>NOAA-20 inputs on test years</td><td>The MODIS sensor and algorithm family</td><td>The continuity claim H1 only</td></tr>
+<tr><td>Terra → Aqua bridge (control)</td><td>-</td><td>Same algorithm, different time of day</td><td>Sanity check: should perform well</td></tr>
+<tr><td>MODIS CMG CloudCorrFirePix</td><td>Our code</td><td>MODIS data and cloud mask</td><td>Coverage-correction consistency</td></tr>
+<tr><td>MCD64A1 burned area</td><td>The active-fire algorithm</td><td>The MODIS sensor</td><td>Peak-month and timing agreement only</td></tr>
+<tr><td>Documented events and literature (CHT jhum Jan–May; regional records)</td><td>Satellites</td><td>-</td><td>Qualitative plausibility</td></tr>
+<tr><td>Sentinel-3 SLSTR active fire (stretch)</td><td>NASA sensors</td><td>-</td><td>Independent timing check</td></tr>
+</tbody></table></div>
+
+<h3>Metrics tied to the claim</h3>
+<div class="tbl wide"><table>
+<thead><tr><th>Metric</th><th>Measures</th><th>Target</th></tr></thead>
+<tbody>
+<tr><td>κ (3-class) vs Aqua classes on 2023–2026, compared with baselines (a)–(d)</td><td>Transition consistency</td><td><span class="tag target">Target</span> κ improvement over constant ratio with 95% CI excluding 0 in ≥1 region</td></tr>
+<tr><td>Empirical coverage of 80% / 95% ranges</td><td>Uncertainty calibration</td><td><span class="tag target">Target</span> 70–90% / 88–98%</td></tr>
+<tr><td>Step change at the simulated handover (log-ratio of merged series across overlap months)</td><td>Artificial jumps</td><td><span class="tag target">Target</span> CI includes 0 for Afterglow, excludes 0 for raw</td></tr>
+<tr><td>|Spearman ρ| between anomaly and clear-view fraction (raw vs corrected)</td><td>Cloud artifacts</td><td><span class="tag target">Target</span> lower for corrected</td></tr>
+<tr><td>Peak-month agreement with MCD64A1</td><td>Seasonal timing plausibility</td><td><span class="tag target">Target</span> within ±1 month in most cells with enough burn</td></tr>
+<tr><td>Pipeline runtime per region-year; UI interaction latency (p95)</td><td>Engineering</td><td><span class="tag target">Target</span> &lt;5 min per region-year; &lt;200 ms recompute</td></tr>
+<tr><td>Analyst task success and confidence calibration (usability)</td><td>Usefulness</td><td><span class="tag target">Target</span> ≥4/5 complete core tasks unaided</td></tr>
+</tbody></table></div>
+<p class="prose"><b>What regional validation supports:</b> "In two or three tested regimes, over 2023–2026, the method preserved anomaly classes across the fleet change better than simpler alternatives." <b>What it does not support:</b> global accuracy. Global claims would need ten or more biomes, multiple years, an independent high-resolution reference (Landsat or Sentinel-2 active fire where available), and analyst field records.</p>
+</section>
+
+<!-- 09 -->
+<section id="ux">
+<h2><span class="sec-num">09 · UI / UX</span>Specification</h2>
+
+<h3>Interaction approaches considered</h3>
+<div class="tbl wide"><table>
+<thead><tr><th>Approach</th><th>Clarity</th><th>Scientific interpretation</th><th>Effort</th><th>Demo value</th></tr></thead>
+<tbody>
+<tr><td>Map-first dashboard</td><td>Familiar, but the question "when?" gets buried</td><td>Invites point-counting</td><td>Low</td><td>Generic</td></tr>
+<tr><td><b>Calendar-first workspace (selected)</b></td><td>The verdict sentence and calendar answer "when, and how unusual"</td><td>Coverage, uncertainty and fleet sit where the judgement happens</td><td>Medium</td><td>High: the stress test happens on the calendar itself</td></tr>
+<tr><td>Scrollytelling narrative</td><td>Great for the story, weak for repeat analysis</td><td>Fixed cases only</td><td>Medium</td><td>High but scripted</td></tr>
+</tbody></table></div>
+<p class="prose"><span class="tag rec">Recommendation</span>Calendar-first, with deep-link "story presets" (bare <code>#tokens</code>) that drive the pitch without a separate narrative build.</p>
+
+<h3>User journey</h3>
+<div class="two">
+<div class="box"><h4>First 30 seconds</h4><ol>
+<li><b>0–5 s:</b> opens on a preset area (Bangladesh, latest complete period) with real data already showing.</li>
+<li><b>5–15 s:</b> reads the verdict sentence. The inline legend explains three encodings: colour = compared with normal, faded = uncertain, hatched = no clear view.</li>
+<li><b>15–30 s:</b> picks their district on the mini-map or by search. The calendar updates; hovering a cell shows its tooltip.</li>
+</ol></div>
+<div class="box"><h4>Core task and resulting action</h4><ol>
+<li>Scan the current-year row against history.</li>
+<li>Open a period in the inspector to see per-satellite evidence, coverage, exclusions and a Worldview link.</li>
+<li>Run the stress test to check whether the verdict depends on MODIS.</li>
+<li>Copy the deep link or export a CSV evidence sheet.</li>
+</ol>
+<p><b>Action:</b> escalate field verification, pre-position resources or issue an advisory. Or record "not unusual; a sensor or cloud artifact" and avoid a false alarm.</p></div>
+</div>
+
+<h3>Information architecture</h3>
+<div class="tbl wide"><table>
+<thead><tr><th>View</th><th>Why it exists</th><th>Entry and exit</th></tr></thead>
+<tbody>
+<tr><td>1 · Calendar workspace (main)</td><td>Answers "when and how unusual" for one area</td><td>Default view. The area picker is inline.</td></tr>
+<tr><td>2 · Period inspector (drawer)</td><td>Shows the evidence behind one verdict</td><td>Click or Enter on a cell; Esc closes; links to Worldview</td></tr>
+<tr><td>3 · Fleet stress test (mode of view 1)</td><td>Shows the central contribution live</td><td>The "Satellites watching" header; Reset restores</td></tr>
+<tr><td>4 · Method &amp; validation</td><td>Method, held-out results, limitations, data versions, licenses, downloads</td><td>The header "Method" link and every ⓘ</td></tr>
+</tbody></table></div>
+
+<h3>Wireframe: main view (desktop, about 1440 × 900)</h3>
+<p class="small">All numbers in the wireframes are illustrative placeholders, not results.</p>
+<pre class="wire">┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ AFTERGLOW   Area: [ Rangamati, Bangladesh ▾ ]  Baseline: 2003–2022 ▾   Show: (●) Adjusted  ( ) Raw  Method ⓘ │
+├────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ <span class="a">VERDICT</span>  6 Mar – 22 Apr 2025: burning was <b>unusually high</b> in 4 of 6 periods (confidence high).    │ ← primary message
+│          2 periods had too few clear views to judge.   Typical peak window: 5 Mar – 14 Apr.        │
+├──────────────────────┬─────────────────────────────────────────────────────────────────────────┤
+│ MINI-MAP             │ CALENDAR  8-day periods ▸   J   F   M   A   M   J   J   A   S   O   N   D   │
+│ ┌──────────────────┐ │ SATELLITES WATCHING                                                     │
+│ │  area outline    │ │  T A N 20 21                                                            │
+│ │  0.25° cells     │ │ 2026 · ● · ● ●  ░░▒▒▓▓██▓▓▒░ ////////  ░░ … (latest: provisional)        │ ← hatched = no clear view
+│ │  shaded for the  │ │ 2025 ● ● ● ● ●  ░░▒▒▓██████▓▒░ //////// ░░ …                            │
+│ │  selected period │ │ 2024 ● ● ● ● ●  ░░▒▓▓▓▓▒▒░░ ////////// ░ …                              │
+│ └──────────────────┘ │  …                                                                      │
+│ Legend               │ 2003 ● ● · · ·  ░▒▒▓▓▒░░ ////////// ░ …                                  │
+│ ▇ above ▇ typical    │ [ Simulate 2027 fleet ]  [ Reset ]   Held-out years: 2023–2026 ⓘ           │ ← signature control
+│ ▇ below ⫽ no view    ├─────────────────────────────────────────────────────────────────────────┤
+│ faded = uncertain    │ SEASON PROFILE  2025 (line, with 80% range) vs baseline median + 10–90% band  │
+└──────────────────────┴─────────────────────────────────────────────────────────────────────────┘
+<span class="m">Hierarchy: verdict → calendar → profile → map. Primary action: open a period. Secondary: area, baseline, mode, stress test.</span></pre>
+
+<h3>Wireframe: inspector state</h3>
+<pre class="wire">┌ 6–13 Mar 2025 · Rangamati ─────────────────────────────── [Esc ×] ┐
+│ <span class="a">UNUSUALLY HIGH</span> · Pr(above 90th pct of 2003–22) = 0.94                       │
+│ Adjusted: 41  [80%: 29–55]  Aqua-MODIS-equivalent detections         │
+│           per 1,000 clear-view km²-days    ⓘ what this unit means    │
+│ Baseline: median 12 · 90th percentile 27                             │
+│ ─ Evidence by satellite ────────────────────────────────────────────  │
+│ Satellite  Raw det.  Clear views  → Aqua-eq. [80%]   Bridge          │
+│ Aqua          14        61%         14  (reference)   -              │
+│ Terra          9        58%         11  [7–16]        Terra→Aqua     │
+│ S-NPP        112        64%         38  [27–52]       S-NPP→Aqua     │
+│ NOAA-20      131        66%         44  [31–60]       N20→S-NPP→Aqua │
+│ Excluded: 23 likely static/industrial · 6 low-confidence  [include]   │
+│ ─ Detections this period ─ [mini-map: ■ MODIS ● VIIRS ◇ excluded]    │
+│ ─ How this was computed ─ 3 lines + link to Method                   │
+│ [ Open this date in NASA Worldview ↗ ]   [ Copy link ]   [ CSV ]    │
+└──────────────────────────────────────────────────────────────────────┘</pre>
+
+<h3>Signature interaction: "Retire the satellites"</h3>
+<div class="callout">
+<p><b>What the user does:</b> clicks <i>Simulate 2027 fleet</i> in the "Satellites watching" header, or toggles any satellite.</p>
+<p><b>What changes:</b> Terra, Aqua and S-NPP columns go hollow. The client recombines each period from the remaining satellites' per-sensor estimates, which ship in the payload, in under 200 ms.</p>
+<ul>
+<li><b>In Raw mode,</b> 2020–2026 rows recolour: counts collapse and many periods flip class against the MODIS-era baseline.</li>
+<li><b>In Adjusted mode,</b> most cells keep their class but fade where ranges widen. Changed cells get a dot.</li>
+<li><b>A counter appears:</b> "Periods keeping their verdict, 2023–2026, this area: Raw x% · Adjusted y%." It is computed live and the held-out years are marked.</li>
+</ul>
+<p><b>What the user understands afterwards:</b> the verdicts don't depend on MODIS staying alive. Where they would, Afterglow says so by widening the range.</p>
+<p><b>Honesty rule:</b> the stress test only runs on years held out from bridge fitting (2023–2026). Earlier years are greyed with "used for calibration".</p>
+</div>
+
+<h3>Wireframe: stress-test state</h3>
+<pre class="wire">SATELLITES WATCHING  [T ○] [A ○] [N ○] [20 ●] [21 ●]   2027 fleet simulated · Reset
+          2026  ░░▒▒▓▓██▓▓▒░ ·  ·            ← dot = verdict changed vs full fleet
+          2025  ░░▒▒▓██████▓▒░    ·
+          2024  ░░▒▓▓▓▓▒▒░░
+          2023  ░▒▒▓▓▒░░  ·
+     2003–2022  (used for calibration – not tested)          greyed
+ ┌───────────────────────────────────────────────────────────┐
+ │ Verdicts kept (2023–26, Rangamati):  Raw 38% · Adjusted 91% │  ← illustrative numbers
+ │ Ranges widened in 11 periods (NOAA-20/21 only).             │
+ └───────────────────────────────────────────────────────────┘</pre>
+
+<h3>Interaction details</h3>
+<ul class="prose">
+<li><b>Area selection:</b> search across a local gazetteer (geoBoundaries units for the demo countries; no external geocoder). Clicking a unit on the map selects it. Drawing a custom rectangle is a stretch feature with approximate ranges, labelled as such.</li>
+<li><b>Time:</b> clicking a year label sets the season profile to that year. Clicking a cell opens the inspector. Shift-click across cells sums a range, shown as one combined verdict with a combined range.</li>
+<li><b>Linked views:</b> selecting a period highlights that column across all years and shades the mini-map cells. The profile marks the period.</li>
+<li><b>Sensor comparison:</b> the Raw/Adjusted switch; the per-satellite table in the inspector; the stress-test toggles.</li>
+<li><b>Evidence:</b> a Worldview link with date, bounding box and fire and true-colour layers; a CSV of detections and per-sensor rows; the method card.</li>
+<li><b>Reset and navigation:</b> <span class="kbd">Esc</span> closes the drawer; Reset restores the full fleet and defaults. State lives in bare hash tokens such as <code>#bd-rangamati-2025-p09</code>, which drive the story presets.</li>
+</ul>
+
+<h3>Scientific transparency at the point of use</h3>
+<ul class="prose">
+<li>Source observations (raw, per satellite) and derived values (adjusted) always appear in separate labelled columns. Raw is never relabelled.</li>
+<li>Every verdict states the baseline years, the unit, the range, the coverage and which satellites contributed.</li>
+<li>Low coverage says "No clear view", never "No fire". Provisional NRT periods carry a dotted outline and the word "provisional".</li>
+<li>The Method page reads <code>validation.json</code>, which the pipeline wrote. Limitations are listed beside the results, not in a footnote.</li>
+</ul>
+
+<h3>Visual system</h3>
+<div class="tbl wide"><table>
+<thead><tr><th>Element</th><th>Choice</th><th>Why for this product</th></tr></thead>
+<tbody>
+<tr><td>Typography</td><td>Semi-condensed grotesque for headings and labels, which fits narrow calendar columns. Humanist sans for body text. Monospace with tabular figures for numbers, dates and units.</td><td>Dense time grids need narrow labels; numbers must align</td></tr>
+<tr><td>Spacing</td><td>4-pt scale. Calendar cell 18×14 px with a 2 px gap: 46 periods ≈ 920 px; 24 year rows ≈ 380 px</td><td>The whole record fits on one desktop screen</td></tr>
+<tr><td>Anomaly colour</td><td>Diverging blue (below) → neutral → amber-brown (above), with no red-green pairing. A value-suppressing uncertainty palette fades high-uncertainty cells toward neutral.</td><td>Uncertainty and value share one mark</td></tr>
+<tr><td>No clear view</td><td>Grey diagonal hatch plus the text label in tooltip and table</td><td>Not colour alone; reads as "absent", not "low"</td></tr>
+<tr><td>Satellites</td><td>MODIS in violet tones with a square glyph; VIIRS in teal tones with a circle glyph; excluded detections as a hollow diamond</td><td>Shape survives colour-blindness and greyscale</td></tr>
+<tr><td>Charts</td><td>Season profile: baseline median line, 10–90% band, selected year with an 80% band; shared x-axis with the calendar</td><td>Same time scale across views</td></tr>
+<tr><td>Map layers</td><td>Muted vector basemap (self-hosted tiles for the offline demo); optional GIBS true-colour; cells as fill; detections as glyphs</td><td>Context without competing with the calendar</td></tr>
+<tr><td>Selection and motion</td><td>2 px ink outline on the selected cell, column highlight; 250 ms colour transition when switching mode or fleet. Under reduced motion: instant change plus a count of changed cells.</td><td>Lets the eye track exactly what changed</td></tr>
+</tbody></table></div>
+<div class="swatches" aria-label="Palette preview">
+  <span class="sw"><i style="background:var(--accent)"></i>accent / above normal</span>
+  <span class="sw"><i style="background:var(--modis)"></i>MODIS</span>
+  <span class="sw"><i style="background:var(--viirs)"></i>VIIRS</span>
+  <span class="sw"><i class="hatch"></i>no clear view</span>
+</div>
+
+<h3>Real states and recovery</h3>
+<div class="tbl wide"><table>
+<thead><tr><th>State</th><th>Behaviour</th><th>Copy</th></tr></thead>
+<tbody>
+<tr><td>Loading</td><td>Calendar skeleton with year labels first; map loads after</td><td class="copy">Loading 24 years of observations…</td></tr>
+<tr><td>Partial data</td><td>A satellite is missing for a period: its row in the inspector shows "no data"; the range widens</td><td class="copy">NOAA-21 has no data before 17 Jan 2024.</td></tr>
+<tr><td>Empty (well observed)</td><td>Neutral cell, coverage ≥ 30%, zero detections</td><td class="copy">No burning detected. 72% of the area was clearly seen.</td></tr>
+<tr><td>Insufficient evidence</td><td>Hatch; no verdict</td><td class="copy">Not enough clear views to judge (18% seen).</td></tr>
+<tr><td>Stale / provisional</td><td>Dotted outline on NRT periods; banner showing the last update</td><td class="copy">Latest two periods are provisional (near-real-time data, updated 3 h ago).</td></tr>
+<tr><td>Source unavailable</td><td>FIRMS API failure: show cached SP data and hide NRT</td><td class="copy">Live data is unavailable right now. Showing the science archive up to 31 Jul 2026.</td></tr>
+<tr><td>Error</td><td>Area file failed to load: retry button, link to presets</td><td class="copy">This area's data didn't load. Try again, or open Bangladesh.</td></tr>
+<tr><td>Slow connection</td><td>Payload under 200 KB gzip per area; map and detection points load lazily</td><td class="copy">-</td></tr>
+</tbody></table></div>
+
+<h3>Responsive and accessible behaviour</h3>
+<ul class="prose">
+<li><b>Desktop (≥1280 px):</b> the layout above. <b>Tablet:</b> the mini-map becomes a strip above the calendar. <b>Phone (&lt;768 px):</b> verdict first, then the calendar with the month header pinned and horizontal scroll inside its own container. The inspector becomes a bottom sheet.</li>
+<li><b>Keyboard:</b> the calendar is an ARIA grid. Arrow keys move between cells, <span class="kbd">Enter</span> opens the inspector, <span class="kbd">Esc</span> closes it, <span class="kbd">T</span> toggles Raw/Adjusted. A visible focus ring is always shown.</li>
+<li><b>Screen readers:</b> each cell announces year, dates, verdict, value, range, coverage and satellites. A "Read as table" switch exposes the same data. The chart summary sentence is generated from the numbers by a template, not by an LLM.</li>
+<li>Text contrast ≥ 4.5:1. Every state has a non-colour cue (hatch, dot, outline, label).</li>
+</ul>
+
+<h3>Key UX copy</h3>
+<div class="tbl wide"><table>
+<thead><tr><th>Where</th><th>Text</th></tr></thead>
+<tbody>
+<tr><td>Mode switch</td><td class="copy">Adjusted (comparable across satellites) · Raw detections (not comparable across years)</td></tr>
+<tr><td>Unit ⓘ</td><td class="copy">Fire-pixel detections per 1,000 km² of ground the satellites could see, scaled to what Aqua MODIS would have detected. One detection is a hot pixel, not one fire.</td></tr>
+<tr><td>Verdict template</td><td class="copy">{Period}: burning was {class} compared with {baseline} ({n} of {m} periods, confidence {level}). {k} periods had too few clear views to judge.</td></tr>
+<tr><td>Hatch tooltip</td><td class="copy">No clear view: clouds or missing data covered {x}% of the area. This is not the same as no fire.</td></tr>
+<tr><td>Stress test</td><td class="copy">Simulate 2027 fleet: Terra, Aqua and Suomi NPP stop sending data. See which verdicts still hold.</td></tr>
+<tr><td>Limitation banner (Method)</td><td class="copy">Afterglow compares satellites with each other. It has not been checked against fires recorded on the ground in Bangladesh.</td></tr>
+<tr><td>Forecast guard</td><td class="copy">Typical peak window is based on 2003–2022. It is not a forecast.</td></tr>
+</tbody></table></div>
+
+<h3>Acceptance criteria</h3>
+<ol class="prose">
+<li>The default area renders a real-data calendar within 2.5 s on a throttled "Fast 3G" profile, from a cold cache. <span class="tag target">Target</span></li>
+<li>Every period with coverage below 30% is hatched and carries "No clear view" in its tooltip and table row. Checked by an automated test.</li>
+<li>In the inspector, per-satellite raw detections sum to the Raw-mode total for the same period. Checked by an automated test.</li>
+<li>Fleet toggles recompute all 1,104 periods in under 200 ms at p95 on a mid-range laptop.</li>
+<li>All cells are reachable by keyboard, and announcements include verdict, range and coverage.</li>
+<li>The Method page lists every dataset with version, access date and license, and shows validation numbers loaded from <code>validation.json</code>.</li>
+<li>The static build runs fully offline from a laptop for a fallback demo.</li>
+</ol>
+
+<h3>Usability test script (5 participants, about 20 minutes each)</h3>
+<ol class="prose">
+<li><b>T1:</b> "Was burning in Rangamati in March 2025 unusual? How sure are you?" Success: names the class and mentions the range or confidence.</li>
+<li><b>T2:</b> "Why are the July cells striped?" Success: says not observed or clouds, not "no fire".</li>
+<li><b>T3:</b> "Is the jump in [period] caused by a new satellite?" Success: uses the inspector or the stress test to answer.</li>
+<li><b>T4:</b> "Imagine it is 2027 and MODIS is gone. Would your answer to T1 change?" Success: runs the stress test and interprets the counter.</li>
+<li><b>T5:</b> "Find satellite imagery for that week." Success: opens the Worldview link.</li>
+</ol>
+<p class="prose">Measure completion, time on task, errors, and stated confidence against correctness. Think aloud. Ask one ease-of-use question per task. <span class="tag target">Target</span> ≥4 of 5 complete T1 and T2 unaided; median T1 under 90 s. Participants: fellow participants, mentors, and at least one person with GIS or forestry background. Record findings, not opinions.</p>
+</section>
+
+<!-- 10 -->
+<section id="build">
+<h2><span class="sec-num">10 · IMPLEMENTATION</span>Ambitious, achievable, demo-safe</h2>
+
+<h3>Smallest complete version</h3>
+<p class="prose">One region (Bangladesh, with districts), real SP data for 2003–2026, coverage from L3 masks, the simple-method bridges with ranges, held-out validation, and the calendar, inspector and stress test. Deployed as a static site with an offline copy. Everything else is an extension.</p>
+
+<div class="three two">
+<div class="box"><h4>Must-have</h4><ol>
+<li>FIRMS SP ingest, filters, dedupe, static mask</li>
+<li>L3 coverage aggregation (CMG fallback for MODIS)</li>
+<li>Simple-method bridges + ranges + verdicts</li>
+<li>Validation harness → validation.json</li>
+<li>Calendar + verdict + inspector + stress test</li>
+<li>Method page, states, accessibility basics</li>
+<li>Videos 2 and 3, NASA project page, repo README</li>
+</ol></div>
+<div class="box"><h4>Ranked extensions</h4><ol>
+<li>Second region (Punjab), then a third</li>
+<li>NRT provisional periods via the FIRMS API</li>
+<li>Season phenology: onset, peak, end per year</li>
+<li>Advanced sensor-response model (gated)</li>
+<li>Custom rectangle area</li>
+<li>Check of the 375 m proxy on sample L2 days</li>
+<li>Sentinel-3 SLSTR timing check</li>
+</ol></div>
+<div class="box"><h4>Cut</h4><ul>
+<li>Chatbot or LLM Q&amp;A (adds risk without adding originality)</li>
+<li>Fire prediction or forecasting</li>
+<li>Burned-area mapping</li>
+<li>Global processing during the hackathon</li>
+<li>Accounts, email alerts, mobile app, 3D globe</li>
+<li>Geostationary and Landsat inputs</li>
+</ul></div>
+</div>
+
+<h3>Architecture</h3>
+<pre class="mermaid">
+flowchart LR
+  A[FIRMS SP archive] --> B[Filter and dedupe]
+  S[Static source mask] --> B
+  B --> D[Detections per sensor, cell, period]
+  M[L3 daily fire masks] --> O[Clear-view land km2-days]
+  D --> R[Observation-aware rate]
+  O --> R
+  R --> BR[Overlap bridges to Aqua scale]
+  BR --> H[Adjusted index with ranges]
+  H --> AN[Verdicts vs leave-one-year-out baseline]
+  AN --> J[Area JSON and provenance]
+  V[Validation harness] --> J
+  J --> UI[Static web app]
+  N[FIRMS NRT API] -.->|provisional| UI
+</pre>
+
+<div class="tbl wide"><table>
+<thead><tr><th>Layer</th><th>Choice</th><th>Reason</th></tr></thead>
+<tbody>
+<tr><td>Pipeline</td><td>Python 3.12; polars or pandas + DuckDB; pyarrow; h5py/netCDF4 and pyhdf or GDAL; numpy; geopandas/shapely; statsmodels (NB GLM); scikit-learn (logistic, calibration); LightGBM optional</td><td>Fast columnar work on a laptop; mature statistics libraries</td></tr>
+<tr><td>Storage</td><td>Parquet files queried with DuckDB; per-area JSON for the app</td><td>Single-file, no server, reproducible</td></tr>
+<tr><td>Frontend</td><td>React + TypeScript + Vite; MapLibre GL JS; d3-scale with custom SVG or canvas for the calendar; small state store</td><td>Open source; the calendar needs custom control</td></tr>
+<tr><td>Hosting</td><td>Static site (GitHub Pages or Cloudflare Pages) plus a local offline build</td><td>Nothing to crash during judging</td></tr>
+<tr><td>Optional API</td><td>FastAPI endpoint to refresh NRT (stretch)</td><td>Keeps keys server-side</td></tr>
+<tr><td>Quality</td><td>pytest on tiny fixtures; Playwright smoke test; schema check on area JSON</td><td>Catches the integration breaks that kill demos</td></tr>
+</tbody></table></div>
+
+<h4>Interfaces</h4>
+<div class="eq">obs.parquet        sensor, cell_id, year, period, daynight, det_veg, det_static, det_lowconf, frp_sum, frp_p50, clear_km2days, land_km2days
+harmonized.parquet unit_id, year, period, h_mean, h_lo80, h_hi80, h_lo95, h_hi95, per_sensor{est,var}, sensors, coverage_max, p_above_q90, p_below_q10, verdict
+area/&lt;id&gt;.json      { unit, years[], periods:46, baseline:{years,q10[],q50[],q90[]}, raw{sensor:[]}, coverage{sensor:[]},
+                     adjusted{mean[],lo80[],hi80[]}, perSensor{sensor:{est[],var[]}}, verdict[], heldOutYears[], provenance }
+provenance.json    dataset short names + versions + granule/file ids + download dates + code commit hash
+validation.json    per region: kappa{ours,a,b,c,d,CI}, coverage80, coverage95, step_change, rho_cloud, runtime</div>
+<p class="small">About 1,104 periods × about 25 numbers per area ≈ 150 KB JSON (about 40 KB gzip). Shipping per-sensor estimates and variances lets the client recompute the stress test instantly.</p>
+
+<h4>Where competitive-programming skills pay off</h4>
+<ul class="prose">
+<li><b>Duplicate and cluster merging:</b> a grid hash plus union-find over 375 m pixels, O(n α(n)).</li>
+<li><b>Near-simultaneous MODIS–VIIRS matching:</b> sort by time, a two-pointer window, then spatial hash buckets. O(n log n) instead of all pairs.</li>
+<li><b>Static mask:</b> a 400 m hash-count of detections per year, then thresholding. O(n), with streaming over the global monthly files.</li>
+<li><b>Area aggregation:</b> precomputed cell-area overlap weights, and prefix sums over time for range sums on shift-select.</li>
+<li><b>Bootstrap:</b> vectorized draws (1,000 × periods) in numpy. Year-block resampling uses pre-indexed arrays.</li>
+</ul>
+
+<h4>Reproducibility, provenance and fallbacks</h4>
+<ul class="prose">
+<li>One command (<code>make all</code> or <code>just all</code>) runs raw files → outputs. The environment is pinned with uv or a conda lock. Data downloads are recorded in <code>provenance.json</code>.</li>
+<li>Licenses: Apache-2.0 for code. A data citations section per FIRMS/LANCE guidance. Third-party licenses (WorldCover, geoBoundaries, map tiles) listed.</li>
+<li><b>Demo fallbacks, in order:</b> live site → offline local build → screen recording → slides with real screenshots.</li>
+<li><b>Global usefulness:</b> the pipeline is region-agnostic (any bounding box and tile set). Expansion path: batch-precompute 0.25° monthly globally with cloud compute near the data, then serve per-country JSON.</li>
+</ul>
+
+<h3>Task plan (during the hackathon)</h3>
+<div class="tbl xwide"><table>
+<thead><tr><th>#</th><th>Task</th><th>Owner</th><th>Depends on</th><th>Accepted when</th><th>Est.</th></tr></thead>
+<tbody>
+<tr><td>T1</td><td>FIRMS SP ingest, filters, dedupe → detections</td><td>DE</td><td>Pre-downloaded raw data</td><td>Per-sensor yearly totals within ±2% of the FIRMS country yearly CSV for Bangladesh (after the same filters)</td><td>2 h</td></tr>
+<tr><td>T2</td><td>L3 coverage aggregation → clear km²-days</td><td>SL + BE</td><td>Raw L3 subsets</td><td>Monsoon coverage below dry-season coverage; 3 random days spot-checked in Worldview</td><td>2.5 h</td></tr>
+<tr><td>T3</td><td>Static persistence mask</td><td>DE</td><td>T1</td><td>10 random flagged sites checked against imagery; excluded counts reported</td><td>1.5 h</td></tr>
+<tr><td>T4</td><td>Bridges (simple method) + bootstrap ranges</td><td>SL</td><td>T1, T2</td><td>Models converge for all strata or fall back to pooled; ranges produced</td><td>3 h</td></tr>
+<tr><td>T5</td><td>Leave-one-year-out baselines + verdicts</td><td>SL</td><td>T4</td><td>Unit test: the test year is excluded from its own baseline</td><td>1.5 h</td></tr>
+<tr><td>T6</td><td>Validation harness → validation.json</td><td>SL</td><td>T4, T5</td><td>κ with CIs for all baselines; interval coverage; step-change test; cloud-correlation test</td><td>2.5 h</td></tr>
+<tr><td>T7</td><td>Export area JSON + provenance + schema test</td><td>BE</td><td>T5</td><td>Schema passes; size under 200 KB gzip</td><td>1.5 h</td></tr>
+<tr><td>T8</td><td>App shell, hash routing, data loader</td><td>FE</td><td>-</td><td>Loads a real area JSON from T7</td><td>1.5 h</td></tr>
+<tr><td>T9</td><td>Calendar component (colour scale, uncertainty fading, hatch, ARIA grid)</td><td>FE</td><td>T8</td><td>Acceptance criteria 2 and 5 pass</td><td>3 h</td></tr>
+<tr><td>T10</td><td>Inspector + Worldview links + CSV</td><td>FE</td><td>T9</td><td>Acceptance criterion 3 passes</td><td>2 h</td></tr>
+<tr><td>T11</td><td>Fleet header + stress test recompute</td><td>FE + UX</td><td>T9, per-sensor payload</td><td>Acceptance criterion 4; counter matches an offline computation</td><td>2.5 h</td></tr>
+<tr><td>T12</td><td>Mini-map (cells, detections, selection link)</td><td>FE</td><td>T8</td><td>Selecting a period shades cells</td><td>2 h</td></tr>
+<tr><td>T13</td><td>Visual design, copy, states, Method page</td><td>UX</td><td>T9</td><td>Every state in the table above renders</td><td>3 h</td></tr>
+<tr><td>T14</td><td>Videos 2 and 3, project page, references, AI-use log</td><td>PM</td><td>Working build</td><td>Uploaded on time; links tested in a private window</td><td>Continuous</td></tr>
+<tr><td>T15</td><td>Deploy + offline build + smoke test</td><td>BE</td><td>T8–T11</td><td>Acceptance criterion 7; Playwright green</td><td>1.5 h</td></tr>
+<tr><td>T16</td><td>Region 2 run (and 3 if time allows)</td><td>DE</td><td>T1–T7 scripts</td><td>Same outputs and validation for the new region</td><td>2 h</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- 11 -->
+<section id="team">
+<h2><span class="sec-num">11 · TEAM</span>Roles and schedule</h2>
+<p class="prose"><span class="tag assume">Assumptions</span>Five people (adaptable from four to six); zero budget, using free tiers; laptops, two with 16 GB+ RAM, plus one 1 TB external SSD; venue internet unreliable; in person at AIUB; building may start at 07:00 on 13 November (confirm); local deadlines as in the BD run of show.</p>
+
+<div class="tbl wide"><table>
+<thead><tr><th>Role</th><th>Owns</th><th>4 people</th><th>6 people</th></tr></thead>
+<tbody>
+<tr><td>SL · Science lead</td><td>Method, bridges, validation, scientific Q&amp;A in judging</td><td>SL</td><td>SL</td></tr>
+<tr><td>DE · Data engineer</td><td>Ingest, filters, static mask, regions</td><td>DE + BE merged</td><td>DE</td></tr>
+<tr><td>BE · Infrastructure</td><td>Coverage pipeline, exports, deploy, tests</td><td>(merged)</td><td>BE</td></tr>
+<tr><td>FE · Frontend lead</td><td>Calendar, inspector, stress test, map</td><td>FE</td><td>FE (+ map by a 2nd frontend dev)</td></tr>
+<tr><td>UX · Product designer</td><td>Visual design, copy, states, accessibility, usability test</td><td>UX + PM merged</td><td>UX</td></tr>
+<tr><td>PM · Story &amp; submission</td><td>Videos, project page, references, timekeeping, rules</td><td>(merged)</td><td>PM</td></tr>
+</tbody></table></div>
+
+<h3>Before the event (7 Oct – 12 Nov), permitted activities only</h3>
+<div class="tbl wide"><table>
+<thead><tr><th>When</th><th>What</th><th>Who</th><th>Rule status</th></tr></thead>
+<tbody>
+<tr><td>7–9 Oct</td><td>Confirm both registrations and Video 1 status; send the clarification email; Earthdata and FIRMS accounts; empty repo with LICENSE</td><td>PM, all</td><td><span class="tag ok">Permitted</span></td></tr>
+<tr><td>7–20 Oct</td><td>Read the core sources (FIRMS FAQ, MODIS and VIIRS user guides, Giglio 2006, Fu 2020, Zheng 2026); one-page notes each</td><td>SL, DE</td><td><span class="tag ok">Permitted</span></td></tr>
+<tr><td>10–25 Oct</td><td>Interview at least 3 analysts or experts about workflow and decisions; record needs as hypotheses</td><td>UX, PM</td><td><span class="tag ok">Permitted</span></td></tr>
+<tr><td>12–25 Oct</td><td>Tool drills on <i>unrelated</i> public data: MapLibre, an SVG/canvas grid, DuckDB, NB GLM, bootstrap, Playwright. Throwaway repos.</td><td>FE, BE, SL</td><td><span class="tag ok">Permitted</span></td></tr>
+<tr><td>28–29 Oct</td><td>Full statement released: diff it against this plan; go/no-go on the concept; update this document</td><td>All</td><td><span class="tag ok">Permitted</span></td></tr>
+<tr><td>After written OK</td><td>Download raw public data for Bangladesh, Punjab and the Paraná Delta to two SSD copies; confirm volumes and that files open</td><td>DE, BE</td><td><span class="tag gray">Only if confirmed</span></td></tr>
+<tr><td>1–8 Nov</td><td>Two timed mock hackathons (about 8 h each) on a 2025 challenge, including a Video 2 drill at T+11 h</td><td>All</td><td><span class="tag ok">Permitted</span></td></tr>
+<tr><td>9–12 Nov</td><td>Freeze laptops and environments; pack power; plan sleep; generic slide and video templates</td><td>All</td><td><span class="tag ok">Permitted</span></td></tr>
+</tbody></table></div>
+
+<h3>Hackathon schedule (Asia/Dhaka) with checkpoints</h3>
+<div class="tbl xwide"><table>
+<thead><tr><th>Time</th><th>Build</th><th>Checkpoint / fallback trigger</th></tr></thead>
+<tbody>
+<tr><td>Fri 07:00–08:30</td><td>Registration, setup, scope lock (15-minute stand-up)</td><td>Data mounts readable on two laptops</td></tr>
+<tr><td>08:30–10:30</td><td>T1, T2, T8; UX visual design; PM project page skeleton</td><td><b>CP0 10:30:</b> if L3 coverage isn't aggregating, switch to MODIS CMG for coverage, with VIIRS coverage approximated from Aqua (labelled)</td></tr>
+<tr><td>10:30–11:30</td><td>Opening ceremony (rotate two builders)</td><td>-</td></tr>
+<tr><td>11:30–12:30</td><td>T3, T9 wired to real data</td><td><b>CP1 12:30:</b> raw + coverage calendar on real data. If the map isn't ready, ship calendar-only.</td></tr>
+<tr><td>12:30–13:30</td><td>Lunch and prayer, staggered</td><td>-</td></tr>
+<tr><td>13:30–16:00</td><td>T4, T5, first T6; T10; T16 starts; Video 2 script</td><td><b>CP2 16:00:</b> adjusted index + first validation number. If the NB GLM fails, use per-stratum ratios with bootstrap ranges.</td></tr>
+<tr><td>16:00–17:30</td><td>Integrate; T11 v0; one person at the mentor round</td><td>-</td></tr>
+<tr><td>17:30–18:30</td><td>Record and upload Video 2 (Drive, YouTube, form)</td><td><b>Hard deadline 18:30</b> (confirm)</td></tr>
+<tr><td>18:30–22:00</td><td>Full T6 on both regions; T12; T13; dinner staggered</td><td><b>Gate 23:00:</b> advanced model only if the simple method is validated</td></tr>
+<tr><td>22:00–01:00</td><td>Stress-test polish; Method page from validation.json; deploy (T15)</td><td><b>CP4 01:00:</b> full flow works on the deployed site</td></tr>
+<tr><td>01:00–05:00</td><td>Sleep in two shifts; usability sessions with available people; fix the top issues; accessibility pass</td><td><b>CP5 05:00: feature freeze</b></td></tr>
+<tr><td>05:00–08:30</td><td>Video 3; project page fields; README; references; AI-use declaration</td><td>Links tested in a private window</td></tr>
+<tr><td>Sat 09:00</td><td>Upload final 30 s video; submit the NASA page</td><td><b>CP6</b> (the 12:00 alternative is unconfirmed)</td></tr>
+<tr><td>09:00–11:00</td><td>Pitch rehearsal ×3; live demo plus fallback video ready</td><td>-</td></tr>
+<tr><td>11:00</td><td>Local judging</td><td>-</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- 12 -->
+<section id="judging">
+<h2><span class="sec-num">12 · JUDGING</span>Evidence mapped to criteria</h2>
+<div class="tbl wide"><table>
+<thead><tr><th>Criterion</th><th>Evidence we show</th><th>Where</th></tr></thead>
+<tbody>
+<tr><td>Impact</td><td>Every fire manager comparing years after MODIS ends; Bangladesh case; region-agnostic pipeline</td><td>Video hook, project summary</td></tr>
+<tr><td>Creativity</td><td>Fleet-transition framing; "Retire the satellites" interaction; a "not observed" state as a first-class result</td><td>Demo</td></tr>
+<tr><td>Validity</td><td>Pre-stated claim H1 and how it could fail; held-out κ and interval coverage; limitations in place</td><td>Method page, repo</td></tr>
+<tr><td>Relevance</td><td>Directly builds a harmonized burning calendar; NASA FIRMS and L3 fire masks drive everything</td><td>Everywhere</td></tr>
+<tr><td>Presentation</td><td>One verdict sentence; a 30 s storyboard with a single change the viewer can see</td><td>Videos</td></tr>
+<tr><td>BD: Teamwork / UX / NASA data (1–5 each)</td><td>Commit history by role; usability results; NASA + ESA WorldCover + geoBoundaries, clearly listed</td><td>Project page, README</td></tr>
+<tr><td>BD: category, repo, page complete (0/1)</td><td>Checklist ticked by PM at 08:30 on Saturday</td><td>Submission</td></tr>
+</tbody></table></div>
+<p class="prose"><b>Award fit, using the 2025 definitions:</b></p>
+<ul class="prose">
+<li><b>Best Use of Science:</b> overlap bridges with held-out validation.</li>
+<li><b>Best Use of Data:</b> makes the record continuous and accessible. Bangladesh won this category in 2018.</li>
+<li><b>Galactic Impact:</b> continuity of the global fire record.</li>
+<li><b>Local Impact:</b> Chittagong Hill Tracts and brick-kiln separation.</li>
+</ul>
+<p class="prose">Re-check the definitions on 13 November.</p>
+</section>
+
+<!-- 13 -->
+<section id="pitch">
+<h2><span class="sec-num">13 · PITCH</span>Outline and demo storyboard</h2>
+<p class="prose">Limits: the global demo is at most 30 s or 7 slides, in English, with English subtitles. Video 2 is at most 240 s and must state NASA data use aloud. Every member is named. No one under 18 appears. All footage must be from the real app on real data. Anything illustrative carries an on-screen "Illustration" label.</p>
+
+<h3>Five-beat demo storyboard</h3>
+<div class="tbl wide"><table>
+<thead><tr><th>Beat</th><th>Content</th><th>Real-data requirement</th></tr></thead>
+<tbody>
+<tr><td>1 · User problem</td><td>"A forest analyst in Rangamati must decide whether this March's burning is unusual. Her 20-year baseline is MODIS. MODIS stops in January."</td><td>Fleet timeline (facts above)</td></tr>
+<tr><td>2 · Baseline misleads</td><td>A raw merged calendar shows a false jump when VIIRS joins, or empty monsoon weeks that are really cloud</td><td><span class="tag hyp">Choose the case by 12:30 Friday</span>. Pick whichever candidate the data shows most clearly: the 2012 step, monsoon cloud, or kiln inflation</td></tr>
+<tr><td>3 · Key interaction</td><td>Switch to Adjusted, then "Simulate 2027 fleet": the raw calendar breaks, Adjusted holds, ranges widen honestly</td><td>Held-out years only</td></tr>
+<tr><td>4 · Decision</td><td>Inspector: "Unusually high, confidence 0.9x" → field check; Worldview imagery confirms smoke or burn scars</td><td>Real period and imagery</td></tr>
+<tr><td>5 · Validation and next step</td><td>"Held-out 2023–26: Adjusted kept x% of verdicts vs y% raw. Next: every country, before Aqua ends."</td><td>Numbers from validation.json</td></tr>
+</tbody></table></div>
+
+<h3>30-second global video (beat sheet)</h3>
+<pre class="wire">0–4 s   Fleet timeline: "Terra MODIS stops in January 2027. Aqua follows."
+4–10 s  Raw calendar for [region]: the misleading case (beat 2)
+10–20 s Click "Simulate 2027 fleet": raw breaks, Afterglow holds; hatched = no clear view
+20–26 s Inspector verdict + Worldview check
+26–30 s Validation line · team names · "NASA FIRMS + MODIS/VIIRS fire masks" · URL</pre>
+
+<h3>240-second local video (Video 2)</h3>
+<p class="prose">Team and members (10 s) → problem and challenge (40 s) → solution and live demo (120 s, the five beats) → NASA data named aloud: FIRMS MODIS C6.1 and VIIRS C2, plus the MOD14A1/MYD14A1/VNP14A1/VJ114A1 fire masks (30 s) → validation, limitations, next step (30 s) → close (10 s).</p>
+<p class="prose"><b>Seven-slide fallback:</b></p>
+<ol class="prose">
+<li>Hook and fleet timeline</li>
+<li>Misleading baseline case</li>
+<li>Method in one diagram</li>
+<li>Stress test before/after</li>
+<li>Inspector decision</li>
+<li>Validation and limits</li>
+<li>Team, data, links</li>
+</ol>
+</section>
+
+<!-- 14 -->
+<section id="critique">
+<h2><span class="sec-num">14 · CRITIQUE</span>Strongest objections and revisions</h2>
+<div class="tbl xwide"><table>
+<thead><tr><th>Perspective</th><th>Objection</th><th>Revision made</th></tr></thead>
+<tbody>
+<tr><td rowspan="5">Remote-sensing scientist</td><td>L3 daily masks are maximum composites; a clear afternoon and a cloudy night look identical</td><td>Coverage is defined honestly as "cell-days with ≥1 clear view". Listed as a limitation. Stretch: an L2 check on sample days.</td></tr>
+<tr><td>The 750 m cloud mask isn't the 375 m algorithm's view</td><td>Labelled as a proxy throughout. A sample comparison is a ranked extension.</td></tr>
+<tr><td>Fire under cloud isn't missing at random</td><td>Periods with coverage below 30% get no verdict instead of extrapolation; a sensitivity analysis is reported.</td></tr>
+<tr><td>Aqua drifts; the reference scale moves</td><td>Acquisition time as a covariate. Bridge training uses pre-2019 years. Flagged as a validity threat.</td></tr>
+<tr><td>Validating against Aqua is circular</td><td>The claim is continuity, worded as such. Independent timing checks (MCD64A1, literature) are kept separate.</td></tr>
+<tr><td rowspan="3">Working analyst</td><td>I need recent days, not a 2–3 month-old archive</td><td>NRT provisional periods use the SP-fitted bridges; latency is shown.</td></tr>
+<tr><td>0.25° cells don't match my districts</td><td>Admin units are aggregated from area-weighted cells; custom areas are a stretch.</td></tr>
+<tr><td>8-day periods are coarse</td><td>The science constraint is explained in the UI; daily raw evidence is in the inspector.</td></tr>
+<tr><td rowspan="3">Product designer</td><td>About 1,100 cells plus uncertainty plus hatching is dense</td><td>Verdict sentence first; uncertainty fades into the same colour (no extra channel); focus-year highlight.</td></tr>
+<tr><td>Users may think "Raw" is the truth</td><td>Adjusted is the default. Raw is labelled "not comparable across years".</td></tr>
+<tr><td>"Fleet" is jargon</td><td>Renamed "Satellites watching", with satellite names.</td></tr>
+<tr><td rowspan="3">Hackathon judge</td><td>Isn't this FIRMS plus a heatmap?</td><td>The baseline is shown side by side; the stress test and held-out numbers carry the difference.</td></tr>
+<tr><td>Did you start early?</td><td>Commit history starts at the event; written rule clarification; this plan contains no code.</td></tr>
+<tr><td>Is it global?</td><td>Region-agnostic pipeline, contrasting regions, stated path and limits for global claims.</td></tr>
+</tbody></table></div>
+<p class="prose"><b>Weaknesses that remain:</b></p>
+<ul class="prose">
+<li>The coverage proxy is approximate.</li>
+<li>NOAA-21 has a short record, and the NOAA-20 bridge rests on three training years.</li>
+<li>There is no ground truth for Bangladesh.</li>
+<li>The usability sample is small.</li>
+<li>Only two or three regions will be covered.</li>
+<li>A build window of about 26 hours, with the Video 2 demo due around 11 hours after the start.</li>
+</ul>
+</section>
+
+<!-- 15 -->
+<section id="risks">
+<h2><span class="sec-num">15 · RISKS</span>Three reasons this could still underperform</h2>
+<div class="tbl wide"><table>
+<thead><tr><th>Risk</th><th>Mitigation</th><th>Evidence that would change the recommendation</th></tr></thead>
+<tbody>
+<tr><td><b>1. Execution compression:</b> a real-data demo is due about 11 h in, and the whole build is about 26 h</td><td>Two timed rehearsals; checkpoints with pre-agreed fallbacks; static-first architecture; a frozen cut list; one person who owns the clock</td><td>Rehearsals show the CP1 vertical slice cannot be reached in about 4 h → drop the map and the second region from the must-haves</td></tr>
+<tr><td><b>2. The science result is weak:</b> the bridges are no better than a constant ratio, or the coverage effect is small</td><td>Pre-stated claim and how it could fail; report honestly; the "no clear view" state and the stress test still carry value</td><td>If κ shows no gain → pivot the headline to "observation-aware calendar with honest uncertainty" and present the bridges as a tested negative result</td></tr>
+<tr><td><b>3. Rule or requirement surprise:</b> the 28 Oct statement adds required outputs, regions or sensors, or organisers forbid pre-downloads</td><td>Diff within 24 h; region-agnostic pipeline; the clarification email now; budget event time for downloads if required</td><td>The statement centres on NRT operations, FRP or emissions, or one country → re-weight toward NRT and FRP, keeping the coverage and fleet core. A public tool that already offers fleet-aware coverage verdicts → switch to Direction B's explainer.</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- 16 -->
+<section id="questions">
+<h2><span class="sec-num">16 · QUESTIONS</span>Only the ones that change decisions</h2>
+<ol class="prose">
+<li><b>Did your team submit Video 1 by 1 October, and is your seat at the Dhaka event confirmed?</b> If not, contact the Local Lead today. The BD guide says Video 1 "can be re-cut right up to the hackathon", but missing it may cost the local seat.</li>
+<li><b>How many people are on the team, and does anyone have GIS or remote-sensing coursework?</b> This plan assumes five people and no formal remote-sensing training. A trained person would take the science lead and allow the advanced model.</li>
+</ol>
+<p class="prose">Everything else proceeds on the stated assumptions.</p>
+</section>
+
+<!-- 17 -->
+<section id="sources">
+<h2><span class="sec-num">17 · SOURCES</span>Checked 7 October 2026</h2>
+<h4>Official competition sources</h4>
+<ul class="src">
+<li><a href="https://www.spaceappschallenge.org/2026/challenges/harmonization-of-modis-and-viirs-hot-spots/">Challenge: Harmonization of MODIS and VIIRS Hot Spots</a> <span class="small">(summary)</span></li>
+<li><a href="https://www.spaceappschallenge.org/2026/challenges/">2026 Challenges</a> · <a href="https://www.spaceappschallenge.org/2026/">2026 event page</a></li>
+<li><a href="https://www.spaceappschallenge.org/resources/participant-faqs/">Participant FAQs</a> <span class="small">(updated 23 Sep 2026)</span> · <a href="https://www.spaceappschallenge.org/legal/">Participant Terms &amp; Conditions</a> <span class="small">(updated 7 Aug 2026)</span></li>
+<li><a href="https://spaceapps-v2-staging.s3.amazonaws.com/media/documents/Final_Space_Apps_2025_Judging_Guidelines_for_web.pdf">2025 Judging Guidelines (PDF)</a> <span class="small">(2026 version due 13 Nov)</span></li>
+<li><a href="https://www.spaceappschallenge.org/2026/local-events/dhaka/">Dhaka Local Event</a> · <a href="https://docs.google.com/document/d/1mSOxplyht5kii8GcCnFaGA-vMHIAVypjl4N6PobnaYQ/edit">Bangladesh Participants Guide</a></li>
+<li><a href="https://www.spaceappschallenge.org/2026/space-agency-partners/">2026 Space Agency Partners</a> · <a href="https://www.spaceappschallenge.org/2026/find-a-team/nusantara-orbit/">Example team on this challenge</a></li>
+</ul>
+<h4>NASA and agency data sources</h4>
+<ul class="src">
+<li><a href="https://www.earthdata.nasa.gov/data/alerts-outages/transition-from-modis-viirs">Earthdata: Transition from MODIS to VIIRS</a> <span class="small">(May 2025)</span></li>
+<li><a href="https://www.earthdata.nasa.gov/data/alerts-outages/suomi-npp-data-product-delivery-cease-november-1-2026">Earthdata: Suomi NPP data product delivery to cease 1 Nov 2026</a> <span class="small">(Aug 2026)</span></li>
+<li><a href="https://atmosphere.copernicus.eu/drifting-away-modis-cams-global-fire-assimilation-system">CAMS: Drifting away from MODIS in GFAS</a> <span class="small">(Feb 2026)</span> · <a href="https://terra.nasa.gov/about/terras-orbit-changes/terra-orbital-drift-information">Terra orbital drift</a></li>
+<li><a href="https://www.earthdata.nasa.gov/data/tools/firms/faq">FIRMS FAQ</a> · <a href="https://firms.modaps.eosdis.nasa.gov/api/area/">FIRMS Area API</a> · <a href="https://firms.modaps.eosdis.nasa.gov/download/">FIRMS Archive Download</a> · <a href="https://firms.modaps.eosdis.nasa.gov/country/">FIRMS Country Yearly Summary</a></li>
+<li><a href="https://www.earthdata.nasa.gov/sites/default/files/imported/MODIS_C6_Fire_User_Guide_B.pdf">MODIS Collection 6 Active Fire Product User's Guide (Rev. B)</a></li>
+<li><a href="https://www.earthdata.nasa.gov/s3fs-public/2025-06/VIIRS_C2_AF-375m_User_Guide_1.2.pdf">VIIRS C2 375 m Active Fire User's Guide v1.2</a> <span class="small">(Jun 2025)</span></li>
+<li><a href="https://www.earthdata.nasa.gov/data/catalog/lpcloud-mod14a1-061">MOD14A1.061</a> · <a href="https://www.earthdata.nasa.gov/data/catalog/lpcloud-vnp14a1-002">VNP14A1.002</a> · <a href="https://www.earthdata.nasa.gov/data/catalog/lpcloud-vj114a1-002">VJ114A1.002</a> · <a href="https://www.earthdata.nasa.gov/data/catalog/lpcloud-vj214a1-002">VJ214A1.002</a> · <a href="https://planetarycomputer.microsoft.com/dataset/modis-14A1-061">Planetary Computer MOD14A1</a></li>
+<li><a href="https://catalogos5.conae.gov.ar/catalogofocos/">CONAE hotspot catalogue</a> · <a href="https://geoavisos.conae.gov.ar/resumen/view/">CONAE GeoAvisos</a> · <a href="https://terrabrasilis.dpi.inpe.br/queimadas/bdqueimadas/">INPE BDQueimadas</a></li>
+<li><a href="https://www.globalnaturewatch.org/blog/data-and-tools/wildfire-trends-gfw-fire-data/">GFW: Tracking wildfire trends</a> · <a href="https://gwis.jrc.ec.europa.eu/applications">GWIS applications</a></li>
+</ul>
+<h4>Research papers</h4>
+<ul class="src">
+<li><a href="https://www.earthdata.nasa.gov/sites/default/files/imported/Giglio2016_C6_Fire.pdf">Giglio, Schroeder &amp; Justice 2016, C6 MODIS active fire algorithm</a> (RSE)</li>
+<li><a href="https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/2005JG000142">Giglio, Csiszar &amp; Justice 2006, Global distribution and seasonality of active fires</a> (JGR)</li>
+<li><a href="https://www.mdpi.com/2072-4292/12/18/2870">Fu et al. 2020, MODIS vs VIIRS fire products in Northeast Asia</a> (Remote Sensing)</li>
+<li><a href="https://www.mdpi.com/2072-4292/12/10/1561">Li, Zhang &amp; Kondragunta 2020, FRP missed by MODIS in Africa</a> (Remote Sensing)</li>
+<li><a href="https://www.mdpi.com/2072-4292/10/7/978">Vadrevu &amp; Lasko 2018, MODIS Aqua vs VIIRS I-band in Punjab</a> (Remote Sensing)</li>
+<li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6520341/">Vadrevu et al. 2019, Fire trends in South/Southeast Asia</a> (Scientific Reports)</li>
+<li><a href="https://www.mdpi.com/2072-4292/18/10/1650">Zheng et al. 2026, FRP correction and fusion of MYD14 and VNP14IMG</a> (Remote Sensing; abstract read)</li>
+<li><a href="https://www.mdpi.com/2073-4433/14/1/97">Farukh et al. 2023, Wildland fires in the hill forests of SE Bangladesh</a> (Atmosphere; snippet) · <a href="https://lib.icimod.org/records/hn3vk-b3h24">ICIMOD, Chittagong Hill Tracts jhum study</a> (snippet)</li>
+<li><a href="https://essopenarchive.org/doi/abs/10.22541/essoar.15007598">Pascolini-Campbell et al. 2026, Wildland fire science for NASA's 2028–2037 Decadal</a> <span class="tag pre">Preprint</span>; snippet only</li>
+</ul>
+<p class="small">"Snippet" means only a search-result excerpt was read. The value-suppressing uncertainty palette (Correll, Moritz &amp; Heer, CHI 2018) is a design reference that was not re-verified in this session.</p>
+</section>
+
+<footer>
+Prepared 7 October 2026 for a Dhaka team entering NASA Space Apps 2026. NASA does not endorse this project; awards are not guaranteed. Working name "Afterglow" is a placeholder.
+</footer>
+</main>
+</div>

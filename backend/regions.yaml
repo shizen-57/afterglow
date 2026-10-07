@@ -1,0 +1,12 @@
+# Region configuration. Add a region by adding an entry; every stage is region-generic.
+# bbox = [west, south, east, north] (degrees). firms_country = token used in FIRMS country file names.
+regions:
+  BGD:
+    name: Bangladesh
+    iso3: BGD
+    firms_country: Bangladesh
+    tz: Asia/Dhaka
+    bbox: [88.0, 20.6, 92.7, 26.7]
+    adm_unit_level: 2        # districts
+    adm_parent_level: 1      # divisions (breadcrumb)
+    years: [2001, 2026]

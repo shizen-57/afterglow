@@ -1,0 +1,10 @@
+.remember/
+.claude/
+node_modules/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+backend/data/
+backend/out/
+frontend/node_modules/
