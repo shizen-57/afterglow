@@ -7,6 +7,7 @@ import {loadBoundaries,loadFires} from './lib/feeds.mjs';
 const root = fileURLToPath(new URL('.', import.meta.url));
 const port = Number(process.env.PORT || 5173);
 const development=process.argv.includes('--dev');
+const modelPath=process.env.AFTERGLOW_MODEL||resolve(root,'../backend/out/frontend/afterglow-model.json');
 const staticRoot=development?root:resolve(root,'dist');
 const vite=development?await(await import('vite')).createServer({server:{middlewareMode:true},appType:'spa'}):null;
 const types = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.mjs':'text/javascript', '.geojson':'application/json', '.svg': 'image/svg+xml', '.json': 'application/json' };
@@ -25,6 +26,7 @@ http.createServer(async (req, res) => {
       try{const data=await(url.pathname==='/api/firms'?fires():boundaries());res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store'}).end(JSON.stringify(data));}
       catch(error){res.writeHead(502,{'Content-Type':'application/json'}).end(JSON.stringify({error:error.message}));}return;
     }
+    if(url.pathname==='/api/model'){try{res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-cache'}).end(await readFile(modelPath));}catch{res.writeHead(404,{'Content-Type':'application/json'}).end(JSON.stringify({error:'No backend model found. Run: python -m afterglow export-frontend (in ../backend).'}));}return;}
     if(vite){vite.middlewares(req,res);return;}
     if(url.pathname!=='/'&&url.pathname!=='/index.html'&&!['/assets/','/data/'].some(p=>url.pathname.startsWith(p))){res.writeHead(404).end('File not found');return;}
     const path = resolve(staticRoot, '.' + decodeURIComponent(url.pathname === '/' ? '/index.html' : url.pathname));

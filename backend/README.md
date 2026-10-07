@@ -22,11 +22,11 @@ python -m pytest
 
 ## Connecting to the frontend
 
-The frontend (`../frontend`) does **not** read `/data/v1`. It loads the live 7-day FIRMS feed itself and takes model results
-through its **Import → calibrated model JSON**. `export-frontend` writes exactly that format (observations + per-district,
-per-period estimates with value/lower/upper/probability/coverage/baselineMedian and `grounded` fleet-removal estimates).
-Import `out/frontend/afterglow-model.json` in the UI. To use the richer `/data/v1` files (clouds, real pass times, terrain),
-the frontend would need a small loader; that is not done yet.
+Connected. `python -m afterglow export-frontend` writes `out/frontend/afterglow-model.json`; the frontend's Node server
+(`../frontend/server.mjs`) serves it at `/api/model` and the app loads it on start (observations 2022-2024 plus per-district,
+per-period estimates, including fleet-removal `grounded` estimates). The path can be changed with `AFTERGLOW_MODEL`.
+If the file does not exist the app falls back to its saved dataset / live FIRMS feed. Restart `npm run dev` after exporting.
+The richer `/data/v1` files (clouds, real pass times, terrain) are not used by the frontend yet.
 
 ## What is real, and what is not
 

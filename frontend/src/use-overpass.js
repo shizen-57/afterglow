@@ -10,15 +10,15 @@ export function useOverpass(notify){
   const[state,setState]=useState(initial),[dataset,setDataset]=useState({observations:[],estimates:[],provenance:'No dataset loaded'}),[boundaries,setBoundaries]=useState(null),[loading,setLoading]=useState(true),[error,setError]=useState('');
   const boundaryRef=useRef(null);boundaryRef.current=boundaries;
   const update=useCallback(change=>setState(s=>({...s,...(typeof change==='function'?change(s):change)})),[]);
-  const applyData=useCallback(async(data,geo=boundaryRef.current)=>{
-    const active={...data,estimates:data.estimates||[],observations:assignDistricts(data.observations,geo)};
+  const applyData=useCallback(async(data,geo=boundaryRef.current,assign=true)=>{
+    const active={...data,estimates:data.estimates||[],observations:assign?assignDistricts(data.observations,geo):data.observations};
     setDataset(active);if(geo)setBoundaries(geo);
     const available=[...active.observations,...active.estimates];let latest=null;if(available.length)latest=available.reduce((a,b)=>a.year*46+a.period>b.year*46+b.period?a:b);
     setState(s=>({...s,year:latest?.year||s.year,period:latest?.period??s.period,satellite:null,grounded:false,area:'Bangladesh',lens:'raw',playing:false}));setError('');setLoading(false);
     try{await saveDataset({...active,districts:geo});}catch{notify('Dataset loaded. Browser storage is unavailable; this session keeps it in memory.');}
   },[notify]);
   const refresh=useCallback(async()=>{update({playing:false});setLoading(true);setError('');try{const geo=await request('/api/boundaries').catch(()=>boundaryRef.current);const data=await request('/api/firms');await applyData(data,geo);notify(data.warnings?.length?'Loaded available feeds. '+data.warnings.join(' '):`Loaded ${data.observations.length} NASA FIRMS observations.`);}catch(e){try{const geo=await request('./data/districts.geojson').catch(()=>boundaryRef.current);const saved=await request('./data/latest.json');await applyData({...saved,stale:true},geo);notify('Using the saved NASA dataset. Refresh with the local server to update.');}catch{setLoading(false);setError(e.message);notify(e.message);}}},[applyData,notify,update]);
-  useEffect(()=>{let cancelled=false;(async()=>{try{const saved=await readSaved();if(saved&&!cancelled){await applyData(saved,saved.districts);return;}}catch{}if(!cancelled)await refresh();})();return()=>{cancelled=true;};},[applyData,refresh]);
+  useEffect(()=>{let cancelled=false;(async()=>{try{const r=await fetch('/api/model');if(r.ok){const model={...parseDataset(await r.text()),imported:true,scope:'Afterglow backend model'};const geo=await request('/api/boundaries').catch(()=>request('./data/districts.geojson')).catch(()=>null);if(!cancelled){await applyData(model,geo,false);notify('Loaded the Afterglow backend model.');return;}}}catch{}try{const saved=await readSaved();if(saved&&!cancelled){await applyData(saved,saved.districts);return;}}catch{}if(!cancelled)await refresh();})();return()=>{cancelled=true;};},[applyData,refresh]);
   const maxYear=useMemo(()=>[...dataset.observations,...dataset.estimates].reduce((max,r)=>Math.max(max,r.year),Math.max(2026,now.getUTCFullYear())),[dataset]);
   useEffect(()=>{if(!state.playing)return;const interval=setInterval(()=>setState(s=>s.period===45?{...s,playing:false}:{...s,period:s.period+1}),600/state.speed);return()=>clearInterval(interval);},[state.playing,state.speed]);
   const areaNames=useMemo(()=>['Bangladesh',...[...new Set([...(boundaries?.features.map(districtName)||[]),...dataset.observations.map(r=>r.district).filter(Boolean),...dataset.estimates.map(e=>e.district)])].filter(n=>n!=='Bangladesh').sort((a,b)=>a.localeCompare(b))],[dataset,boundaries]);

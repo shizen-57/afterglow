@@ -41,6 +41,10 @@ The static build includes the latest saved dataset, map renderer, and boundary d
 - Dark/light themes, keyboard shortcuts, guided tour, screen-reader announcements, and reduced-motion support.
 - shadcn/ui buttons, tabs, selects, sliders, tooltips, switches, cards, dialogs, an evidence sheet, command palette, export menu, tables, skeletons, and Sonner notifications.
 
+## Backend model
+
+If `../backend/out/frontend/afterglow-model.json` exists (`python -m afterglow export-frontend` in `../backend`), `server.mjs` serves it at `/api/model` and the app loads it on start, with its estimates, instead of the saved 7-day feed. Override the path with `AFTERGLOW_MODEL`. Restart the server after re-exporting.
+
 ## Import data
 
 **FIRMS CSV:** required columns `latitude,longitude,acq_date,satellite`; supported optional columns `acq_time,confidence,frp,district,excluded`. Times are UTC HHMM. The parser supports Terra/T, Aqua/A, S-NPP/N, NOAA-20/N20/J1, and NOAA-21/N21/J2. Missing acquisition time is displayed as unknown; supply acquisition time for accurate pass-board times. Invalid CSV rows are counted and reported; identical source records are deduplicated. Unknown satellites are rejected. A CSV import replaces the active observation dataset and removes prior model estimates.
