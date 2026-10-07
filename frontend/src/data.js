@@ -40,7 +40,14 @@ export function pointInRing(p,r){let inside=false;for(let i=0,j=r.length-1;i<r.l
 export function pointInGeometry(p,g){const polys=g.type==='Polygon'?[g.coordinates]:g.type==='MultiPolygon'?g.coordinates:[];return polys.some(r=>pointInRing(p,r[0])&&!r.slice(1).some(h=>pointInRing(p,h)));}
 export function districtName(f){return String(f.properties?.shapeName||f.properties?.name||f.properties?.district||'Unnamed area');}
 export function assignDistricts(rows,boundaries){return rows.map(r=>{const f=boundaries?.features.find(f=>pointInGeometry([r.longitude,r.latitude],f.geometry));return{...r,district:f?districtName(f):r.district};});}
-export function selectObservations(rows,s,{allSatellites=false,includeRemoved=false}={}){return rows.filter(r=>r.year===s.year&&r.period===s.period&&(s.area==='Bangladesh'||r.district===s.area)&&(allSatellites||!s.satellite||r.satellite===s.satellite)&&(!s.grounded||includeRemoved||!satellites.find(a=>a.name===r.satellite)?.retiring)&&(s.includeLow||!r.lowConfidence)&&(!r.excluded||s.includeExcluded));}
+function matchesObservation(r,s,{allSatellites=false,includeRemoved=false}={}){return(s.area==='Bangladesh'||r.district===s.area)&&(allSatellites||!s.satellite||r.satellite===s.satellite)&&(!s.grounded||includeRemoved||!satellites.find(a=>a.name===r.satellite)?.retiring)&&(s.includeLow||!r.lowConfidence)&&(!r.excluded||s.includeExcluded);}
+export function selectObservations(rows,s,options){return rows.filter(r=>r.year===s.year&&r.period===s.period&&matchesObservation(r,s,options));}
+export function calendarSummary(rows,estimates,s){
+  const counts=new Map(),models=new Map();
+  for(const r of rows){if(matchesObservation(r,s)){const key=`${r.year}|${r.period}`;counts.set(key,(counts.get(key)||0)+1);}}
+  if(!s.satellite)for(const e of estimates){if(e.district!==s.area)continue;const key=`${e.year}|${e.period}`;if(!models.has(key))models.set(key,s.grounded?e.grounded?{...e,...e.grounded}:null:e);}
+  return{counts,models};
+}
 export function selectedEstimate(estimates,s){if(s.satellite)return null;const e=estimates.find(e=>e.year===s.year&&e.period===s.period&&e.district===s.area);return s.grounded&&e?e.grounded?{...e,...e.grounded}:null:e;}
 export function verdict(e){return!e?'Not assessed':e.coverage<30?'Not observed':e.probability>=.8?'Unusually high':e.probability>=.6?'Possibly unusual':'Within usual range';}
 export function passSummary(rows,satellite){const own=rows.filter(r=>r.satellite===satellite),dates=[...new Set(own.map(r=>r.day))],times=[...new Set(own.filter(r=>r.acquisitionTimeKnown!==false).map(r=>new Date(r.date).toLocaleTimeString('en-GB',{timeZone:'Asia/Dhaka',hour:'2-digit',minute:'2-digit'})))].sort();return{count:own.length,days:dates.length,time:times[0]||'—',times,frp:own.reduce((sum,r)=>sum+(r.frp||0),0)};}

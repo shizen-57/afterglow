@@ -16,6 +16,8 @@ Open **http://localhost:5173**. The server binds to localhost. Set `PORT` to use
 
 The interface uses React, official shadcn/ui components, Radix accessible primitives, Tailwind CSS, and Lucide icons. Public Sans and DM Mono are preserved. Map rendering, map colors, data layers, camera settings, and the map presentation follow the original version.
 
+The default workspace is a full-window map with search and a compact playback timeline. The left tools open **Explore districts**, **Layers**, **Satellites**, and **Evidence** on demand. Select the date to choose a year or playback speed. The upper-right menu contains import, refresh, export, theme, and help. Fleet experiments live in the Satellites panel; the calendar lives in Layers. Detailed information stays off the map until requested.
+
 `npm run dev` runs the React development frontend and the data proxy together. For a production build, run `npm run build`, then `npm start`. The production server serves the compiled `dist` frontend with the same live data endpoints.
 
 The included `data/latest.json` is a real NASA dataset fetched on 7 October 2026, not generated sample data. The UI shows the source and fetch timestamp in the evidence panel. Select **Refresh FIRMS** for current data. A server refresh reuses its cache for 15 minutes. NASA provides the last seven days; historical years require an archive CSV import.
@@ -36,14 +38,20 @@ The static build includes the latest saved dataset, map renderer, and boundary d
 - Select a satellite to isolate its observations. Select a district in the map, list, menu, or command palette.
 - 46-period calendar, year and period sliders, playback, and speed controls share the current selection.
 - Grounding removes actual Terra, Aqua, and S-NPP records; re-launch restores them. Raw retention is computed from loaded detections.
-- CSV, GeoJSON, and calibrated JSON imports are validated. The active dataset persists in IndexedDB.
+- CSV, GeoJSON, and calibrated JSON imports are validated and grouped on the server. Imported workspaces persist in `frontend/.cache/workspaces/`; the browser remembers only the workspace ID. Static hosting without the server uses IndexedDB as an offline fallback.
 - Evidence panel exposes provenance, filters, raw table, CSV export, evidence JSON, and a date-linked NASA Worldview launch.
 - Dark/light themes, keyboard shortcuts, guided tour, screen-reader announcements, and reduced-motion support.
 - shadcn/ui buttons, tabs, selects, sliders, tooltips, switches, cards, dialogs, an evidence sheet, command palette, export menu, tables, skeletons, and Sonner notifications.
 
 ## Backend model
 
-If `../backend/out/frontend/afterglow-model.json` exists (`python -m afterglow export-frontend` in `../backend`), `server.mjs` serves it at `/api/model` and the app loads it on start, with its estimates, instead of the saved 7-day feed. Override the path with `AFTERGLOW_MODEL`. Restart the server after re-exporting.
+If `../backend/out/frontend/afterglow-model.json` exists (`python -m afterglow export-frontend` in `../backend`), the Node server reads, validates, and indexes it once. The app starts with its latest available period instead of the saved 7-day feed. Override the path with `AFTERGLOW_MODEL`. Restart the server after re-exporting.
+
+The Python backend handles data ingestion, clear-view coverage, aggregation, sensor calibration, uncertainty, validation, and fleet-removal estimates. The Node query layer handles historical filtering, district summaries, pass-board summaries, retention, calendar aggregation, import parsing, district assignment, and exports. The browser handles interface state and geographic rendering. It receives only the selected period's observations and summaries; it never downloads the full historical model during normal server-backed use.
+
+The browser requests `/api/workspace/manifest`, `/api/workspace/boundaries`, and `/api/workspace/selection` with the selected year, period, district, satellite, and filters. `/api/workspace/calendar` returns compact counts only when the calendar opens. `/api/workspace/import` and `/api/workspace/refresh` accept POST requests; `/api/workspace/export.csv` and `/api/workspace/evidence.json` export the current selection. The original `/api/model` route remains available for explicit archive downloads but is not used by the app. If no model export exists, the same query layer serves the real FIRMS feed. Missing years and scientific outputs remain empty.
+
+Run `npm run dev` or `npm start` to keep this work on the server. A static-only deployment has no query server and uses the saved live dataset or browser imports instead.
 
 ## Import data
 
@@ -98,4 +106,4 @@ NASADEM elevation, L3 fire-mask cloud slabs, historical calibration, true predic
 - [shadcn/ui](https://ui.shadcn.com/): interface component source, MIT; [Lucide](https://lucide.dev/): consistent SVG icons, ISC.
 - Public Sans and DM Mono: Google Fonts, with system fallbacks.
 
-The Node server exposes only intended frontend files and fixed feed routes, with no arbitrary URL proxy. File imports stay in the browser.
+The Node server exposes intended frontend files, fixed feed routes, and validated workspace queries, with no arbitrary URL proxy. Imports are limited to 50 MB and stored locally on the server; generated caches are excluded from Git.

@@ -5,3 +5,5 @@ data/
 out/
 .env
 *.egg-info/
+.venv/
+.uv-cache/

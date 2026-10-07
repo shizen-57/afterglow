@@ -3,6 +3,7 @@ import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { resolve, extname, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {loadBoundaries,loadFires} from './lib/feeds.mjs';
+import {createWorkspaceStore,workspaceHandler} from './lib/workspace.mjs';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 const port = Number(process.env.PORT || 5173);
@@ -18,9 +19,11 @@ async function boundaries(){if(boundaryCache)return boundaryCache;if(!boundaryPr
 async function fires(){if(fireCache&&Date.now()-Date.parse(fireCache.fetchedAt)<15*60000)return fireCache;if(!firePromise)firePromise=(async()=>{let districts;try{districts=await boundaries();}catch{}try{const data=await loadFires(districts);fireCache=data;await save('latest.json',data);return data;}catch(error){const saved=await cachedFile('latest.json');if(saved)return{...saved,stale:true,warnings:[...(saved.warnings||[]),error.message]};throw error;}})().finally(()=>{firePromise=null;});return firePromise;}
 boundaryCache=await cachedFile('districts.geojson');
 fireCache=await cachedFile('latest.json');
+const handleWorkspace=workspaceHandler(createWorkspaceStore({modelPath,cacheDir:resolve(root,'.cache/workspaces'),boundaries,fires}));
 http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url, 'http://localhost');
+    if(await handleWorkspace(req,res,url))return;
     if(req.method!=='GET'){res.writeHead(405).end('Method not allowed');return;}
     if(url.pathname==='/api/firms'||url.pathname==='/api/boundaries'){
       try{const data=await(url.pathname==='/api/firms'?fires():boundaries());res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store'}).end(JSON.stringify(data));}

@@ -23,9 +23,12 @@ python -m pytest
 ## Connecting to the frontend
 
 Connected. `python -m afterglow export-frontend` writes `out/frontend/afterglow-model.json`; the frontend's Node server
-(`../frontend/server.mjs`) serves it at `/api/model` and the app loads it on start (observations 2022-2024 plus per-district,
-per-period estimates, including fleet-removal `grounded` estimates). The path can be changed with `AFTERGLOW_MODEL`.
-If the file does not exist the app falls back to its saved dataset / live FIRMS feed. Restart `npm run dev` after exporting.
+(`../frontend/server.mjs`) validates and indexes it on the server (observations 2022-2024 plus per-district,
+per-period estimates, including fleet-removal `grounded` estimates). The browser loads only metadata, boundaries,
+and the selected eight-day period from `/api/workspace/*`, rather than downloading the complete archive.
+Filtering, district/pass summaries, retention, calendar aggregation, imports, and exports run in the Node query layer.
+Scientific fitting and data preparation remain in this Python pipeline. The path can be changed with `AFTERGLOW_MODEL`.
+If the file does not exist the query server uses the real saved/live FIRMS feed. Restart `npm run dev` after exporting.
 The richer `/data/v1` files (clouds, real pass times, terrain) are not used by the frontend yet.
 
 ## What is real, and what is not
