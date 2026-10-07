@@ -126,11 +126,31 @@ def run(region: str):
             cand_results[name] = res
         h1.update(n_reference_cells=int(judged_ref.sum()), reference="Aqua-only verdict vs combined-fleet baseline",
                   candidates=cand_results)
-        # interval calibration
+        # same comparison on the national series: district-period counts are mostly 0-3, so district kappa is mostly noise
+        sel_c = np.zeros_like(sel)
+        sel_c[U, ho_years, :] = True
+        sel_c &= V[ia] & V[ij1]
+        ref_c = sel_c & judged(ref_code)
+        country = {"n_reference_cells": int(ref_c.sum())}
+        both = sel_c & np.isfinite(per_mu[ij1])
+        if both.sum() >= 20:
+            country["corr_log_rate"] = float(np.corrcoef(per_mu[ij1][both], np.log(rho[ia][both]))[0, 1])
+            country["mean_log_bias"] = float((per_mu[ij1][both] - np.log(rho[ia][both])).mean())
+        for name, code in cands.items():
+            bc = ref_c & judged(code)
+            if bc.sum() >= 20:
+                _, y2, _ = np.nonzero(bc)
+                country[name] = _kappa_ci(_cls(ref_code[bc]), _cls(code[bc]), np.zeros_like(y2), y2)
+        h1["country_level"] = country
+        # interval calibration. z uses the bridged sigma plus Aqua's count noise only (the chain sigma already holds the
+        # sensor-to-sensor overdispersion). 'informative' = cells where the bridge predicts >= 3 Aqua detections.
         both = sel & np.isfinite(per_mu[ij1]) & np.isfinite(per_mu[ia])
-        z = (per_mu[ij1][both] - np.log(rho[ia][both])) / np.sqrt(per_sg[ij1][both] ** 2 + per_sg[ia][both] ** 2)
+        z = (per_mu[ij1][both] - np.log(rho[ia][both])) / np.sqrt(per_sg[ij1][both] ** 2 + 1.0 / (A["D"][ia][both] + 0.5))
+        exp_a = np.exp(per_mu[ij1][both]) * A["clear"][ia][both] / 1000.0
         calib = {"noaa20_via_bridges": {"n": int(both.sum()), "coverage80": float(np.mean(np.abs(z) <= Z80)),
-                                        "coverage95": float(np.mean(np.abs(z) <= Z95))}}
+                                        "coverage95": float(np.mean(np.abs(z) <= Z95))},
+                 "noaa20_via_bridges_informative": {"n": int((exp_a >= 3).sum()),
+                                                    "coverage80": float(np.mean(np.abs(z[exp_a >= 3]) <= Z80)) if (exp_a >= 3).any() else None}}
         no_a = np.array([s != "A" for s in ["T", "A", "N", "J1", "J2"]])
         mu_nc, sg_nc, n_nc = combine(per_mu, per_sg, no_a, r)
         both2 = sel & np.isfinite(mu_nc)
@@ -244,6 +264,7 @@ def run(region: str):
                terra_control=tc, verdicts_kept=kept, warnings=warnings_)
     (state_dir(region) / "validation.json").write_text(json.dumps(out, indent=1, default=float), encoding="utf-8")
     print("  H1 candidates:", {k: (None if v["kappa"] is None else round(v["kappa"], 3)) for k, v in cand_results.items()})
+    print("  H1 country-level:", h1.get("country_level"))
     print("  calibration:", h1.get("calibration"))
     print("  step change:", stp)
     print("  cloud artifact:", cl)

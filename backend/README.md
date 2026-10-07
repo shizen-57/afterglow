@@ -39,12 +39,25 @@ the frontend would need a small loader; that is not done yet.
 
 ## Validation (Bangladesh, held-out 2023-2024) - read before claiming anything
 
-Written to `out/data/v1/validation.json`. The headline claim H1 (NOAA-20 verdicts via bridges agree with Aqua better than a
-constant ratio) is **not supported** by this build: kappa about 0.01 vs 0.19 for a constant ratio. Intervals are too wide
-(coverage80 about 0.97, target 0.80). The Terra control also shows no agreement. Only two held-out years exist, so year-block
-CIs are unreliable. What does hold: the S-NPP step change shrinks (log-ratio +0.26 raw vs -0.07 harmonized), and the cloud
-artifact was removed by replacing a +0.5 pseudo-count with a constant rate floor.
-A count-aware interval calibration is the next fix (a first attempt was disabled; see `science.py`).
+Written to `out/data/v1/validation.json`. Only two held-out years exist, so every year-block CI is unreliable.
+
+What holds:
+* **Rate continuity.** At national level the bridged NOAA-20 log-rate tracks Aqua's with correlation 0.97 (mean log bias -0.13).
+* **Step change.** When S-NPP joins, raw counts jump by +0.26 in log terms; the harmonized series moves +0.03.
+* **Cloud artifact.** Spearman rho between anomaly and clear-view fraction in quiet periods: 0.14 for raw counts, 0.01 harmonized.
+
+What does not hold, or cannot be judged:
+* **H1 (verdict agreement) is not supported at district level.** kappa 0.013 for the bridges vs 0.11 for a constant ratio. Most
+  district-periods in Bangladesh have 0-3 detections, so about 98% of cells are "typical" for both sensors and kappa is mostly
+  noise. At national level the held-out years contain no unusual periods, so kappa is degenerate (0.0). It needs a region with
+  more fires or more held-out years.
+* **Intervals.** Coverage of the 80% interval is 0.98 over all cells (zero-count cells are trivially covered) but only 0.63
+  (n = 57) in cells where the bridge predicts at least 3 Aqua detections. So intervals are too wide when counts are tiny and a
+  little too narrow when they are not; a count-aware calibration is still open (a first, naive attempt was disabled; see `science.py`).
+* The Terra control shows no verdict agreement (kappa 0.02): Terra's counts are too sparse per district-period.
+
+The chain no longer draws synthetic counts at each link (that biased log-rates low and double-counted Poisson noise); it
+propagates the expected rate and adds delta-method variance (`predict_sensor`, covered by a test).
 
 Deviation from backend.md: bridges use total counts with a night-share covariate, solved by a small NumPy IRLS with a weak
 prior; annual intervals are a delta-method approximation.

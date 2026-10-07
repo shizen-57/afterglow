@@ -118,3 +118,19 @@ def test_tile_math():
     assert terrain.lonlat_to_tile(90.4, 23.8, 6) == (48, 27)
     z5 = list(terrain.tiles_for_bbox([88.0, 20.6, 92.7, 26.7], 5, 5))
     assert 0 < len(z5) < 20
+
+
+def test_predict_sensor_propagates_mean_and_delta_variance():
+    S, U1, Y, P = config.S, 1, 1, config.P
+    D = np.zeros((S, U1, Y, P))
+    D[SIDX["T"]] = 4.0
+    A = dict(D=D, clear=np.full((S, U1, Y, P), 2000.0))
+    V = np.zeros((S, U1, Y, P), bool)
+    V[SIDX["T"]] = True
+    rho = np.full((S, U1, Y, P), 2.0)
+    B = 5
+    pool = dict(beta=np.tile([0.0, 1.0, 0.0, 0.0, 0.0], (B, 1)), alpha=np.full(B, 0.2), level=1, n=1)
+    mu, sg = science.predict_sensor("T", A, rho, V, np.zeros_like(rho), {("T", "A"): {"pool": pool}},
+                                    np.array([-1], np.int8), np.random.default_rng(0), B)
+    assert mu[0, 0, 0] == pytest.approx(np.log(2.0 + config.RATE_FLOOR))          # E[rate], no sampled counts
+    assert sg[0, 0, 0] == pytest.approx(np.sqrt(1 / 4.5 + 0.2))                  # source count noise + overdispersion

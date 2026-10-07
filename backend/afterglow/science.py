@@ -162,14 +162,18 @@ def predict_sensor(s: str, A, rho, V, ns, models, strata_u, rng, B):
     Y = shape[1]
     sn, cs = _season(Y)
     sin_, cos_ = sn[y, p], cs[y, p]
-    clear_s = A["clear"][SIDX[s]].ravel()[idx] / 1000.0
     ns_s = ns[SIDX[s]].ravel()[idx]
     x = np.tile(np.log(rho[SIDX[s]].ravel()[idx]), (B, 1))
     su = strata_u[u]
+    # The latent Aqua-scale rate is propagated deterministically (E[D_to | rho_from]): drawing a count at each link would add
+    # Poisson noise of counts nobody observed and bias log-rates low (Jensen). Uncertainty = bootstrap spread of the bridge
+    # parameters + delta-method terms: source count noise 1/(D+0.5) carried through the slopes + NB overdispersion per link.
+    v = 1.0 / (A["D"][SIDX[s]].ravel()[idx] + 0.5)
     for f, t in links:
         mod = models[(f, t)]
-        rate = np.empty_like(x)
-        alpha_cell = np.empty_like(x)
+        slope = np.empty(len(idx))
+        alpha_med = np.empty(len(idx))
+        x_new = np.empty_like(x)
         for k in (-1, 0, 1, 2):
             sel = su == k
             if not sel.any():
@@ -177,16 +181,14 @@ def predict_sensor(s: str, A, rho, V, ns, models, strata_u, rng, B):
             key = "pool" if k == -1 or STRATA[k] not in mod else STRATA[k]
             m = mod[key]
             b = m["beta"][:B] if len(m["beta"]) >= B else np.resize(m["beta"], (B, 5))
-            al = m["alpha"][:B] if len(m["alpha"]) >= B else np.resize(m["alpha"], B)
             eta = b[:, 0:1] + b[:, 1:2] * x[:, sel] + b[:, 2:3] * ns_s[sel] + b[:, 3:4] * sin_[sel] + b[:, 4:5] * cos_[sel]
-            rate[:, sel] = np.exp(np.clip(eta, -20, 12))
-            alpha_cell[:, sel] = al[:, None]
-        mean = rate * clear_s
-        n_par = 1.0 / alpha_cell
-        cnt = rng.negative_binomial(n_par, n_par / (n_par + mean))
-        x = np.log(cnt / clear_s + RATE_FLOOR)
+            x_new[:, sel] = np.log(np.exp(np.clip(eta, -20, 12)) + RATE_FLOOR)
+            slope[sel] = np.median(b[:, 1])
+            alpha_med[sel] = np.median(m["alpha"])
+        x = x_new
+        v = slope**2 * v + alpha_med
     mu_o.ravel()[idx] = x.mean(0)
-    sg_o.ravel()[idx] = x.std(0, ddof=1)
+    sg_o.ravel()[idx] = np.sqrt(x.var(0, ddof=1) + v)
     return mu_o, sg_o
 
 
